@@ -1,0 +1,19 @@
+{
+  "name": "motormines-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+"scripts": {
+  "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+  "backend": "cd motormines-backend && nodemon app.js",
+  "frontend": "cd motormines-frontend && npm run dev"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.10"
+  }
+}
