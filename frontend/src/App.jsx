@@ -14,14 +14,21 @@ import Cart from './pages/Cart'
 import Profile from './pages/Profile'
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from './components/Footer'
-import { AuthProvider } from "./context/AuthContext"; 
+// import { AuthProvider } from "./context/AuthContext"; 
+import AuthProvider from "./context/AuthContext";
 import YourRoutes from "./components/ProtectedRoute";
-
+import CartProvider from "./context/CartContext";
+import Checkout from './pages/Checkout'
+import { Toaster } from "react-hot-toast";  
 
 const App = () => {
   return (
     <>
+     {/* <YourRoutesOrComponents />  */}
+      <Toaster position="top-center" reverseOrder={false} />  {/* like alert */}
+
       <AuthProvider>
+        <CartProvider> 
         <Navbar />
         <div className="p-6">
           <Routes>
@@ -33,6 +40,10 @@ const App = () => {
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/newpassword" element={<NewPassword />} />
             <Route path="/moreproduct" element={<MoreProduct />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+
+
 
             {/* 👇 Protected routes */}
             <Route
@@ -63,7 +74,8 @@ const App = () => {
         </div>
         {/* <About />
         <Contact /> */}
-        <Footer />
+        {/* <Footer /> */}
+        </CartProvider>
       </AuthProvider>
     </>
   )

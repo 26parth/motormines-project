@@ -3,17 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
-  "start": "concurrently \"npm run backend\" \"npm run frontend\"",
-  "backend": "cd motormines-backend && nodemon app.js",
-  "frontend": "cd motormines-frontend && npm run dev"
-},
+  "scripts": {
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && nodemon app.js",
+    "frontend": "cd frontend && npm run dev"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "tailwindcss": "^4.1.16"
   }
 }

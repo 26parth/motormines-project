@@ -1,46 +1,22 @@
 const express = require("express");
 const router = express.Router();
-const { registerUser, loginUser } = require("../controllers/userController"); // ✅ dono import kiye
+const userController = require("../controllers/userController");
+const { protect } = require("../middlewares/authMiddleware");
 
-// POST /users/register
-router.post("/register", registerUser);
+// 🧩 Public Routes
+router.post("/register", userController.registerUser);
+router.post("/login", userController.loginUser);
+router.post("/logout", userController.logoutUser);
 
-// POST /users/login
-router.post("/login", loginUser);
+router.put("/address", protect, userController.updateAddress); // adress store karne ke liye 
+// 🧩 Protected Route (only logged-in user can access)
+router.get("/profile", protect, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user, // middleware se milta hai
+  });
+});
+router.put("/address", protect, userController.updateAddress);
+
 
 module.exports = router;
-
-
-// const express = require("express");
-// const { body } = require("express-validator");
-// const authController = require("../controllers/authController");
-
-// const router = express.Router();
-
-// /**
-//  * POST /users/register
-//  * body: { fullname, email, password, contact }
-//  */
-// router.post(
-//   "/register",
-//   // validation rules
-//   [
-//     body("fullname").trim().notEmpty().withMessage("Fullname is required"),
-//     body("email").isEmail().withMessage("Valid email required").normalizeEmail(),
-//     body("password").isLength({ min: 6 }).withMessage("Password min 6 chars")
-//   ],
-//   authController.register
-// );
-
-// module.exports = router;
-
-
-// // const express = require('express');
-// // const router = express.Router();
-
-// // router.get("/", function (req,res) {
-// //     res.send("Main Hu userRouter");
-// // });
-
-// // module.exports = router;
-

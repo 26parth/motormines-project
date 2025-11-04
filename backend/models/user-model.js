@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+
 const userSchema = mongoose.Schema({
   fullname: String,
   email: { type: String, unique: true },
@@ -9,6 +10,16 @@ const userSchema = mongoose.Schema({
   cart: { type: Array, default: [] },
   orders: { type: Array, default: [] },
   picture: String,
+
+  // 👇 Order address save karne ke liye use kara hai !!
+  address: {
+    country: { type: String, default: "India" },
+    state: String,
+    city: String,
+    street: String,
+    pincode: String,
+    phone: String,
+  },
 });
 
 module.exports = mongoose.model("user", userSchema);

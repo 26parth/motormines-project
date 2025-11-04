@@ -10,7 +10,14 @@ const productsRouter = require("./routes/productsRouter");
 const usersRouter = require("./routes/usersRouter");
 
 // 🧩 Middlewares
-app.use(cors()); // 👈 Allow frontend (React) to call backend
+// const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",  // 👈 React frontend origin
+    credentials: true,                 // 👈 allow cookies + auth
+  })
+); // 👈 Allow frontend (React) to call backend
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

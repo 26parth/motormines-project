@@ -9,50 +9,40 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-  const { user, setUser } = useContext(AuthContext);
+  const { user, fetchProfile } = useContext(AuthContext);
 
-  // ✅ Prevent logged-in user from seeing Login page again
+  // ✅ Redirect logged-in user
   useEffect(() => {
     if (user) {
       navigate("/");
     }
   }, [user, navigate]);
 
-  // ✅ For input handling
+  // ✅ Input change handler
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Main submit handler
+  // ✅ Submit handler (Secure with backend cookies)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:3000/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      
+      const res = await axios.post(
+        "http://localhost:3000/users/login",
+        formData,
+        { withCredentials: true }
 
-      const data = await res.json();
-      console.log("Login response:", data);
+      );
 
-      if (data.success) {
-        // ✅ Save to Context + localStorage
-        setUser(data.user);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-        }
-
-        navigate("/"); // ✅ Redirect after successful login
+      if (res.data.success) {
+        await fetchProfile(); // 👈 fetch user from backend
+        navigate("/"); // redirect home
       } else {
-        setMessage(data.message || "Invalid email or password");
+        setMessage(res.data.message || "Invalid email or password");
       }
     } catch (err) {
       console.error("Login error:", err);

@@ -2,16 +2,23 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { ShoppingCart, User, Package, LogOut, Edit, Menu, X } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
+import { CartContext } from "../context/CartContext"; // 👈 add this line
 
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  // const [cartCount, setCartCount] = useState(0);
+const { cartCount } = useContext(CartContext);
+
     // 👇 Ye line add karo — ye context se user state lega
-  const { user, setUser } = useContext(AuthContext);
+const { user, setUser, logout } = useContext(AuthContext);
+
+  // const { cartCount } = useContext(CartContext);
   // const [user, setUser] = useState(null); // 👈 store logged-in user
   const profileRef = useRef(null);
   const navigate = useNavigate();
+
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -24,20 +31,17 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // On page load, check if user exists in localStorage
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
+const handleLogout = async () => {
+  console.log("Logout button clicked ✅");
+  try {
+    await logout();
+    console.log("Logout API called ✅");
+    setProfileOpen(false);
     navigate("/login");
-  };
+  } catch (err) {
+    console.error("Logout failed ❌", err);
+  }
+};
 
   return (
     <nav className="bg-gray-900 text-white shadow-md px-4 md:px-6 py-3 sticky top-0 z-50">
@@ -98,14 +102,15 @@ export default function Navbar() {
         {/* Right: Cart, Orders, Profile */}
 <div className="flex items-center gap-4">
   {/* 👇 Cart only for logged-in users */}
-  {user && (
-    <NavLink to="/cart" className="relative hover:text-blue-300">
-      <ShoppingCart size={20} />
-      <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 rounded-full flex items-center justify-center">
-        2
-      </span>
-    </NavLink>
-  )}
+{user && (
+  <NavLink to="/cart" className="relative hover:text-blue-300">
+    <ShoppingCart size={20} />
+    <span className="absolute -top-2 -right-2 bg-red-500 text-xs w-5 h-5 rounded-full flex items-center justify-center">
+      {cartCount}
+    </span>
+  </NavLink>
+)}
+
 
   {/* 👇 Orders only for logged-in users */}
   {user && (

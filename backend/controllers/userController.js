@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user-model");
+const jwt = require("jsonwebtoken");
 
 // ✅ Register user (secure)
 exports.registerUser = async (req, res) => {
@@ -56,6 +57,30 @@ exports.registerUser = async (req, res) => {
     });
   }
 };
+exports.updateAddress = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { country, state, city, street, pincode, phone } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        address: { country, state, city, street, pincode, phone },
+      },
+      { new: true }
+    ).select("-password");
+
+    res.json({
+      success: true,
+      message: "Address updated successfully 🏠",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error("Update address error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 
 // ✅ Login user (secure)
 exports.loginUser = async (req, res) => {
@@ -89,15 +114,27 @@ exports.loginUser = async (req, res) => {
     }
 
     // 4️⃣ If login successful
-    res.status(200).json({
-      success: true,
-      message: "Login successful 🎉",
-      user: {
-        id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-      },
-    });
+// 4️⃣ If login successful → create JWT token
+const token = jwt.sign(
+  { id: user._id, email: user.email },
+  "MOTORMINES_SECRET_KEY", // secret key (store in .env ideally)
+  { expiresIn: "7d" } // valid for 7 days
+);
+
+// Send token in cookie (HTTP-only)
+res
+  .cookie("token", token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: false, // change to true when you deploy with HTTPS
+  })
+  .status(200)
+  .json({
+    success: true,
+    message: "Login successful 🎉",
+    user: { id: user._id, fullname: user.fullname, email: user.email },
+  });
+
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({
@@ -106,3 +143,13 @@ exports.loginUser = async (req, res) => {
     });
   }
 };
+exports.logoutUser = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",  // keep same as login
+    secure: false,
+    path: "/",        // 👈 add this line (important)
+  });
+  return res.json({ success: true, message: "Logged out successfully" });
+};
+

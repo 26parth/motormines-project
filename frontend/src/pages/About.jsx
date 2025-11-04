@@ -2,6 +2,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion"; 
+import Footer from "../components/Footer";
 
 
 const About = () => {
@@ -49,6 +50,8 @@ const About = () => {
   ];
 
   return (
+    <>
+
     <div className="bg-white py-4 px-4 sm:px-6 lg:px-8"> {/* 👈 Increased top padding */}
       {/* ======= WHY CHOOSE SECTION ======= */}
       <motion.div
@@ -131,6 +134,8 @@ const About = () => {
         </div>
       </motion.div>
     </div>
+    {/* <Footer/> */}
+    </>
   );
 };
 
