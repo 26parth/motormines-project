@@ -80,6 +80,20 @@ exports.updateAddress = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+// in userController.js add:
+
+// maybe payment section kai liye add kiya hai 
+// exports.saveAddress = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const address = req.body;
+//     const user = await User.findByIdAndUpdate(userId, { address }, { new: true }).select("-password");
+//     res.json({ success: true, user });
+//   } catch (err) {
+//     console.error("saveAddress error:", err);
+//     res.status(500).json({ success: false, message: "Failed to save address" });
+//   }
+// };
 
 
 // ✅ Login user (secure)

@@ -6,7 +6,7 @@ import About from './pages/About'
 import Contact from "./pages/Contact";
 import Login from './pages/Login'
 import Register from './pages/Register'
-import ForgotPassword from './pages/Forgotpassword'
+import ForgotPassword from './pages/ForgotPassword'
 import NewPassword from './pages/NewPassword'
 import MoreProduct from './pages/MoreProduct'
 import Orders from './pages/Orders'

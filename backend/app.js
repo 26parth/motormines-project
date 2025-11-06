@@ -8,6 +8,9 @@ const db = require("./config/mongoose-connection");
 const ownersRouter = require("./routes/ownersRouter");
 const productsRouter = require("./routes/productsRouter");
 const usersRouter = require("./routes/usersRouter");
+const paymentRouter = require("./routes/paymentRouter");
+const orderRouter = require("./routes/orderRouter");
+
 
 // 🧩 Middlewares
 // const cors = require("cors");
@@ -33,6 +36,11 @@ app.use("/owners", ownersRouter);
 app.use("/users", usersRouter);  // yaha users likha hai isliye hame users ke koy bhi route par jana hai to direct wahi likho means ki users/register nahi only /register bro Matlab agar koi URL /users/... se start ho rahi hai →jao usersRouter file me dekho uska next route kya hai!
 
 app.use("/products", productsRouter);
+
+// payment routes hai bro ye !!
+app.use("/payment", paymentRouter);
+
+app.use("/orders", orderRouter);
 
 // 🚀 Start server
 app.listen(3000, () => {
