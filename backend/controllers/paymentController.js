@@ -1,66 +1,62 @@
-const Razorpay = require("razorpay");
-const crypto = require("crypto");
-const Order = require("../models/order-model");
-const User = require("../models/user-model");
+import Razorpay from "razorpay";
+import crypto from "crypto";
+import Order from "../models/order-model.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_xxx",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "rzp_test_secret",
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// POST /payment/create-order
-exports.createOrder = async (req, res) => {
+// Create Razorpay Order
+export const createOrder = async (req, res) => {
   try {
-    const { amount, currency = "INR" } = req.body;
-    if (!amount || amount <= 0) return res.status(400).json({ success: false, message: "Invalid amount" });
+    const { amount } = req.body;
 
-    // Razorpay expects amount in paise
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ success: false, message: "Invalid amount" });
+    }
+
     const options = {
-      amount: Math.round(amount * 100), // rupees -> paise
-      currency,
-      receipt: `rcpt_${Date.now()}`,
+      amount: Math.round(amount * 100), // in paise
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
     };
+
     const order = await razorpay.orders.create(options);
-    res.json({ success: true, order });
+    res.status(200).json({ success: true, order });
   } catch (err) {
-    console.error("createOrder error:", err);
-    res.status(500).json({ success: false, message: "Order creation failed" });
+    console.error("Create Order Error:", err);
+    res.status(500).json({ success: false, message: "Razorpay order creation failed" });
   }
 };
 
-// POST /payment/verify-payment
-exports.verifyPayment = async (req, res) => {
+// Verify Payment & Save Order
+export const verifyPayment = async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, cartItems, address } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderItems, address } = req.body;
 
-    // verify signature
-    const generated_signature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "rzp_test_secret")
-      .update(razorpay_order_id + "|" + razorpay_payment_id)
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
       .digest("hex");
 
-    if (generated_signature !== razorpay_signature) {
-      return res.status(400).json({ success: false, message: "Invalid signature" });
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: "Payment verification failed" });
     }
 
-    // find user from req (using protect middleware that sets req.user)
-    const user = req.user;
-    if (!user) return res.status(401).json({ success: false, message: "Unauthorized" });
-
-    // compute amount numeric from cartItems (frontend should pass items with numeric price)
-    const amount = cartItems.reduce((s, it) => s + Number(it.priceNumeric) * it.quantity, 0);
-
-    // create order record
-    const newOrder = new Order({
-      user: user._id,
-      items: cartItems.map(i => ({
-        productId: i.id,
+    const newOrder = await Order.create({
+      user: req.user._id,
+      items: orderItems.map(i => ({
+        productId: i.productId,
         title: i.title,
-        price: Number(i.priceNumeric),
+        price: i.price,
         quantity: i.quantity,
         img: i.img,
       })),
-      amount,
+      amount: orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0),
       address,
       payment: {
         method: "razorpay",
@@ -71,16 +67,9 @@ exports.verifyPayment = async (req, res) => {
       status: "processing",
     });
 
-    await newOrder.save();
-
-    // optionally push order id into user.orders
-    user.orders = user.orders || [];
-    user.orders.push(newOrder._id);
-    await user.save();
-
-    res.json({ success: true, order: newOrder });
+    res.status(200).json({ success: true, order: newOrder });
   } catch (err) {
-    console.error("verifyPayment error:", err);
-    res.status(500).json({ success: false, message: "Payment verification failed" });
+    console.error("Payment verify error:", err);
+    res.status(500).json({ success: false, message: "Error verifying payment" });
   }
 };

@@ -1,12 +1,17 @@
-import React from "react";
+// src/components/ProtectedRoute.jsx
+import React, { useContext } from "react";
 import { Navigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
+// ✅ Ensure it returns children correctly
+const ProtectedRoute = ({ children }) => {
+  const { user } = useContext(AuthContext);
 
-// protected routes hai user login ke bina access nahi karne denge !
-export default function ProtectedRoute({ children }) {
-  const user = localStorage.getItem("user");
   if (!user) {
     return <Navigate to="/login" replace />;
   }
-  return children;
-}
+
+  return children; // 👈 important
+};
+
+export default ProtectedRoute;

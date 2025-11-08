@@ -1,52 +1,104 @@
-const Order = require("../models/order-model"); // <-- ye model bana hona chahiye
-const asyncHandler = require("express-async-handler");
+const Order = require("../models/order-model");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
 
-// ============================
-// 1️⃣ Create COD (Cash on Delivery) Order
-// ============================
-const createCodOrder = asyncHandler(async (req, res) => {
-  const { items, totalAmount, shippingAddress } = req.body;
+// ✅ COD order create
+exports.createCodOrder = async (req, res) => {
+  try {
+    const { items, shippingAddress, totalAmount } = req.body;
 
-  // Validation
-  if (!items || items.length === 0) {
-    res.status(400);
-    throw new Error("No order items provided");
+    const order = await Order.create({
+      user: req.user._id,
+      items,
+      amount: totalAmount,
+      address: shippingAddress,
+      payment: {
+        method: "cod",
+        status: "pending",
+      },
+      status: "processing",
+    });
+
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error("COD Order Error:", err);
+    res.status(500).json({ success: false, message: "COD order failed" });
   }
+};
 
-  // Create new order
-  const order = await Order.create({
-    user: req.user._id, // protect middleware se user aayega
-    items,
-    totalAmount,
-    shippingAddress,
-    paymentMethod: "COD",
-    paymentStatus: "Pending",
-    orderStatus: "Processing",
-  });
+// ✅ Razorpay order create
+exports.createRazorpayOrder = async (req, res) => {
+  try {
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
 
-  res.status(201).json({
-    success: true,
-    message: "Order created successfully (COD)",
-    order,
-  });
-});
+    const { amount } = req.body;
+    const order = await razorpay.orders.create({
+      amount: amount * 100,
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+    });
 
-// ============================
-// 2️⃣ Get User Orders
-// ============================
-const getUserOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).sort({
-    createdAt: -1,
-  });
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error("Create Razorpay Order Error:", err);
+    res.status(500).json({ success: false, message: "Failed to create payment order" });
+  }
+};
 
-  res.status(200).json({
-    success: true,
-    count: orders.length,
-    orders,
-  });
-});
+// ✅ Verify Razorpay payment
+exports.verifyPayment = async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      orderItems,
+      address,
+    } = req.body;
 
-module.exports = {
-  createCodOrder,
-  getUserOrders,
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+
+    const isValid = expectedSignature === razorpay_signature;
+
+    if (!isValid)
+      return res.status(400).json({ success: false, message: "Invalid signature" });
+
+    // ✅ Create order after payment success
+    const order = await Order.create({
+      user: req.user._id,
+      items: orderItems,
+      amount: orderItems.reduce((acc, i) => acc + i.price * i.quantity, 0),
+      address,
+      payment: {
+        method: "razorpay",
+        status: "paid",
+        razorpay_order_id,
+        razorpay_payment_id,
+      },
+      status: "processing",
+    });
+
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error("Verify Payment Error:", err);
+    res.status(500).json({ success: false, message: "Payment verification failed" });
+  }
+};
+
+// ✅ Get user's all orders (for My Orders page)
+exports.getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+    res.json({ success: true, orders });
+  } catch (err) {
+    console.error("Get Orders Error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch orders" });
+  }
 };

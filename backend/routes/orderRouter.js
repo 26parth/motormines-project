@@ -1,9 +1,24 @@
 const express = require("express");
-const router = express.Router();
-const orderController = require("../controllers/orderController");
+const {
+  createCodOrder,
+  createRazorpayOrder,
+  verifyPayment,
+  getUserOrders,
+} = require("../controllers/orderController");
 const { protect } = require("../middlewares/authMiddleware");
 
-router.post("/create-cod", protect, orderController.createCodOrder);
-router.get("/", protect, orderController.getUserOrders);
+const router = express.Router();
+
+// 🧾 Create COD order
+router.post("/create-cod", protect, createCodOrder);
+
+// 💳 Create Razorpay order
+router.post("/create-order", protect, createRazorpayOrder);
+
+// ✅ Verify Razorpay payment
+router.post("/verify-payment", protect, verifyPayment);
+
+// 📦 Get all orders of logged-in user
+router.get("/orders", protect, getUserOrders);
 
 module.exports = router;

@@ -2,14 +2,15 @@ const mongoose = require("mongoose");
 
 
 const userSchema = mongoose.Schema({
-  fullname: String,
-  email: { type: String, unique: true },
-  password: String,
-  contact: Number,
-  isadmin: { type: Boolean, default: false },
-  cart: { type: Array, default: [] },
-  orders: { type: Array, default: [] },
-  picture: String,
+  fullname: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  contact: { type: String },
+  isAdmin: { type: Boolean, default: false },
+  cart: { type: Array, default: [] },   //cart ham localstrorage kai throught la rahe hai 
+
+  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }], // Order ham backend ke throught la rahe hai 
+  img: String,  // pata nahi kya kaha se aa raha hai 
 
   // 👇 Order address save karne ke liye use kara hai !!
   address: {
@@ -20,48 +21,8 @@ const userSchema = mongoose.Schema({
     pincode: String,
     phone: String,
   },
+   createdAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("user", userSchema);
-
-
-// const mongoose = require('mongoose');
-
-// const userSchema = mongoose.Schema({
-//   fullname: { type: String, required: true },
-//   email: { type: String, required: true, unique: true, lowercase: true },
-//   password: { type: String, required: true },
-//   cart: { type: Array, default: [] },
-//   isadmin: { type: Boolean, default: false },
-//   orders: { type: Array, default: [] },
-//   contact: { type: Number, default: null },
-//   picture: { type: String, default: "" },
-// }, { timestamps: true });
-
-// module.exports = mongoose.model("User", userSchema);
-
-
-// const mongoose = require('mongoose');
-// // mongoose.connect("mongodb://127.0.0.1:27017/motormines");
-
-// const userSchema = mongoose.Schema({
-
-//     fullname: String,
-//     email: String,
-//     password: String,
-//     cart: {
-//         type: Array,
-//         default: []
-//     },
-//     isadmin: Boolean,
-//     orders: {
-//         type: Array,
-//         default: []
-//     },
-//     contact: Number,
-//     picture: String,
-
-// });
-
-// module.exports = mongoose.model("user", userSchema);
 

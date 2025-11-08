@@ -1,16 +1,15 @@
-const mongoose = require('mongoose');
-// mongoose.connect("mongodb://127.0.0.1:27017/motormines"); hamne userSchema mai use kar liya hai !!
+const mongoose = require("mongoose");
 
 const productSchema = mongoose.Schema({
-
-    image: String,
-    name: String,
-    price: String,
-    discount: {
-        type: Number,
-        default: []
-    },
-
+  name: { type: String, required: true },
+  image: { type: String },
+  price: { type: Number, required: true },
+  discount: { type: Number, default: 0 },
+  description: { type: String },
+  stock: { type: Number, default: 0 },
+  category: { type: String },
+  createdAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("product", productSchema);
+  

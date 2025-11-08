@@ -1,17 +1,17 @@
 const mongoose = require("mongoose");
 
-const orderSchema = new mongoose.Schema({
+const orderSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true },
   items: [
     {
-      productId: Number, // or String depending on your product id type
-      title: String,
-      price: Number,
-      quantity: Number,
+      productId: { type: mongoose.Schema.Types.ObjectId, ref: "product", required: true },
+      title: { type: String, required: true },
+      price: { type: Number, required: true },
+      quantity: { type: Number, required: true },
       img: String,
     },
   ],
-  amount: { type: Number, required: true }, // in paise or rupees (we will use rupees)
+  amount: { type: Number, required: true }, // Total amount
   address: {
     country: String,
     state: String,
@@ -27,7 +27,6 @@ const orderSchema = new mongoose.Schema({
     razorpay_order_id: String,
   },
   status: {
-    // order fulfillment status shown to user
     type: String,
     enum: ["processing", "packed", "shipped", "out_for_delivery", "delivered", "cancelled"],
     default: "processing",
@@ -35,4 +34,4 @@ const orderSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = mongoose.model("order", orderSchema);

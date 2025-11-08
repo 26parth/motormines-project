@@ -39,22 +39,19 @@ const Checkout = () => {
     loadAddress();
   }, [user]);
 
-  // compute numeric price for each cart item for backend
+  // ✅ Correct mapping for backend
   const itemsForBackend = cartItems.map(i => ({
-    id: i.id,
-    title: i.title,
-    img: i.img,
+    productId: i._id, // MongoDB ObjectId
+    title: i.name || i.title,
+    img: i.image || i.img,
     quantity: i.quantity,
-    priceNumeric: Number(String(i.price).replace(/[₹,]/g, "")),
+    price: Number(String(i.price).replace(/[₹,]/g, "")),
   }));
 
-  const total = itemsForBackend.reduce((sum, item) => sum + item.priceNumeric * item.quantity, 0);
+  const total = itemsForBackend.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Save address to backend
   const handleSaveAddress = async () => {
-    if (!state || !city || !street || !pincode || !phone) {
-      return alert("Please fill all address details!");
-    }
+    if (!state || !city || !street || !pincode || !phone) return alert("Please fill all fields");
     const newAddress = { country, state, city, street, pincode, phone };
     try {
       const res = await axios.put("http://localhost:3000/users/address", newAddress, { withCredentials: true });
@@ -62,26 +59,32 @@ const Checkout = () => {
         setSavedAddress(res.data.user.address);
         setIsEditing(false);
         await fetchProfile();
-        alert("✅ Address saved successfully!");
+        alert("Address saved ✅");
       }
     } catch (err) {
-      console.error("Address save error:", err);
-      alert("❌ Failed to save address");
+      console.error(err);
+      alert("Failed to save address ❌");
     }
   };
 
-  // COD order
+  // COD order placement
   const handlePlaceCodOrder = async () => {
     if (!savedAddress) return alert("Please save address before placing order");
+    if (cartItems.length === 0) return alert("Your cart is empty!");
     setProcessing(true);
     try {
-      const res = await axios.post("http://localhost:3000/orders/create-cod", {
-        cartItems: itemsForBackend,
-        address: savedAddress,
-      }, { withCredentials: true });
+      const res = await axios.post(
+        "http://localhost:3000/orders/create-cod",
+        {
+          items: itemsForBackend,
+          shippingAddress: savedAddress,
+          totalAmount: total,
+        },
+        { withCredentials: true }
+      );
+
       if (res.data.success) {
         alert("✅ COD Order placed!");
-        // optionally clear cart
         setCartItems([]);
         navigate("/orders");
       }
@@ -93,152 +96,117 @@ const Checkout = () => {
     }
   };
 
-  // Razorpay flow
+  // Razorpay online payment
   const handleProceedToPayment = async () => {
-    if (!savedAddress) return alert("Please save your address before payment");
+    if (!savedAddress) return alert("Save address first");
+    if (total <= 0) return alert("Invalid total");
+
     setProcessing(true);
     try {
-      // 1) ask backend to create razorpay order
-      const createRes = await axios.post("http://localhost:3000/payment/create-order", { amount: total }, { withCredentials: true });
+      const createRes = await axios.post(
+        "http://localhost:3000/payment/create-order",
+        { amount: total },
+        { withCredentials: true }
+      );
+
       if (!createRes.data.success) throw new Error("Order creation failed");
       const razorOrder = createRes.data.order;
 
       const options = {
-        key: process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_xxx",
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: razorOrder.amount,
         currency: razorOrder.currency,
         name: "MotorMines",
-        description: "MotorMines Purchase",
+        description: "Purchase",
         order_id: razorOrder.id,
-        prefill: {
-          name: user.fullname,
-          email: user.email,
-          contact: savedAddress?.phone || "",
-        },
-        handler: async function (response) {
-          // call backend to verify and create order record
+        prefill: { name: user.fullname, email: user.email, contact: savedAddress.phone },
+        handler: async (response) => {
           try {
-            const verifyRes = await axios.post("http://localhost:3000/payment/verify-payment", {
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              cartItems: itemsForBackend,
-              address: savedAddress,
-            }, { withCredentials: true });
-
+            const verifyRes = await axios.post(
+              "http://localhost:3000/payment/verify-payment",
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderItems: itemsForBackend,
+                address: savedAddress,
+              },
+              { withCredentials: true }
+            );
             if (verifyRes.data.success) {
-              alert("✅ Payment successful and order created!");
+              alert("Payment successful ✅");
               setCartItems([]);
               navigate("/orders");
-            } else {
-              alert("Payment verification failed");
-            }
+            } else alert("Payment verification failed ❌");
           } catch (err) {
-            console.error("Verification/Order creation error:", err);
-            alert("Error verifying payment");
+            console.error(err);
+            alert("Error verifying payment ❌");
           }
         },
-        modal: { ondismiss: () => { setProcessing(false); } },
+        modal: { ondismiss: () => setProcessing(false) },
       };
 
-      // load script if needed
       if (!window.Razorpay) {
         const script = document.createElement("script");
         script.src = "https://checkout.razorpay.com/v1/checkout.js";
         script.async = true;
         document.body.appendChild(script);
-        script.onload = () => {
-          const rzp = new window.Razorpay(options);
-          rzp.open();
-        };
+        script.onload = () => new window.Razorpay(options).open();
       } else {
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+        new window.Razorpay(options).open();
       }
     } catch (err) {
-      console.error("Payment init error:", err);
-      alert("Payment failed to start");
+      console.error(err);
+      alert("Payment failed ❌");
       setProcessing(false);
     }
   };
 
-  if (!user) return <p className="text-center mt-10">Please login to continue checkout.</p>;
-  if (cartItems.length === 0) return <p className="text-center mt-10">Your cart is empty 🛒</p>;
-  if (loading) return <p className="text-center mt-10">Loading your address...</p>;
+  if (!user) return <p className="text-center mt-10">Login first</p>;
+  if (cartItems.length === 0) return <p className="text-center mt-10">Cart empty 🛒</p>;
+  if (loading) return <p className="text-center mt-10">Loading address...</p>;
 
   return (
     <div className="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md mt-8">
       <h2 className="text-2xl font-bold mb-4">Checkout 🧾</h2>
 
+      {/* Address */}
       <div className="mb-5">
-        <h3 className="text-lg font-semibold mb-2 flex items-center justify-between">
+        <h3 className="text-lg font-semibold mb-2 flex justify-between items-center">
           Delivery Address
-          {!isEditing && (
-            <button onClick={() => setIsEditing(true)} className="text-blue-600 text-sm underline">Edit Address</button>
-          )}
+          {!isEditing && <button onClick={() => setIsEditing(true)} className="text-blue-600 underline text-sm">Edit</button>}
         </h3>
 
         {isEditing ? (
-          <div className="space-y-3 mb-4">
-            <div>
-              <label className="block text-sm font-medium">Country</label>
-              <input type="text" value={country} readOnly className="border rounded w-full p-2 bg-gray-100" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label>State</label>
-                <input value={state} onChange={e => setState(e.target.value)} className="border rounded w-full p-2" />
-              </div>
-              <div>
-                <label>City</label>
-                <input value={city} onChange={e => setCity(e.target.value)} className="border rounded w-full p-2" />
-              </div>
-            </div>
-            <div>
-              <label>Street / Area / House No.</label>
-              <input value={street} onChange={e => setStreet(e.target.value)} className="border rounded w-full p-2" />
-            </div>
-            <div>
-              <label>Pincode</label>
-              <input value={pincode} onChange={e => setPincode(e.target.value)} className="border rounded w-full p-2" maxLength={6}/>
-            </div>
-            <div>
-              <label>Phone</label>
-              <input value={phone} onChange={e => setPhone(e.target.value)} className="border rounded w-full p-2" />
-            </div>
-            <button onClick={handleSaveAddress} className="bg-blue-600 text-white px-4 py-2 rounded mt-3">Save Address</button>
+          <div className="space-y-3">
+            <input type="text" value={state} placeholder="State" onChange={e => setState(e.target.value)} className="border p-2 w-full rounded" />
+            <input type="text" value={city} placeholder="City" onChange={e => setCity(e.target.value)} className="border p-2 w-full rounded" />
+            <input type="text" value={street} placeholder="Street" onChange={e => setStreet(e.target.value)} className="border p-2 w-full rounded" />
+            <input type="text" value={pincode} placeholder="Pincode" onChange={e => setPincode(e.target.value)} className="border p-2 w-full rounded" maxLength={6} />
+            <input type="text" value={phone} placeholder="Phone" onChange={e => setPhone(e.target.value)} className="border p-2 w-full rounded" />
+            <button onClick={handleSaveAddress} className="bg-blue-600 text-white px-4 py-2 rounded">Save Address</button>
           </div>
         ) : (
-          <div className="border rounded-md p-4 bg-gray-50">
-            <p><strong>Address:</strong> {savedAddress.street}, {savedAddress.city}, {savedAddress.state} - {savedAddress.pincode}, {savedAddress.country}</p>
-            <p><strong>Phone:</strong> {savedAddress.phone}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <input type="radio" name="address" defaultChecked />
-              <label>Use this address</label>
-            </div>
+          <div className="border p-4 bg-gray-50 rounded">
+            <p>{savedAddress.street}, {savedAddress.city}, {savedAddress.state} - {savedAddress.pincode}</p>
+            <p>Phone: {savedAddress.phone}</p>
           </div>
         )}
       </div>
 
+      {/* Order Summary */}
       <h3 className="text-lg font-semibold mb-2">Order Summary</h3>
       <ul className="divide-y">
-        {cartItems.map(item => (
-          <li key={item.id} className="flex justify-between py-2">
-            <span>{item.title} (x{item.quantity})</span>
-            <span>{item.price}</span>
-          </li>
+        {cartItems.map(i => (
+          <li key={i._id} className="flex justify-between py-2">{i.title} x{i.quantity} <span>₹{i.price}</span></li>
         ))}
       </ul>
+      <div className="flex justify-between mt-4 font-bold">Total: ₹{total.toLocaleString()}</div>
 
-      <div className="flex justify-between mt-4 font-bold">
-        <span>Total:</span>
-        <span>₹{total.toLocaleString()}</span>
-      </div>
-
-      {/* Buttons */}
+      {/* Payment */}
       <div className="mt-4 space-y-2">
-        <button onClick={handlePlaceCodOrder} className="w-full bg-yellow-600 text-white py-2 rounded" disabled={processing}>Place Order (Cash on Delivery)</button>
-        <button onClick={handleProceedToPayment} className="w-full bg-blue-600 text-white py-2 rounded" disabled={processing}>Proceed to Payment</button>
+        <button onClick={handlePlaceCodOrder} disabled={processing} className="w-full bg-yellow-600 text-white py-2 rounded">Place Order (COD)</button>
+        <button onClick={handleProceedToPayment} disabled={processing} className="w-full bg-blue-600 text-white py-2 rounded">Pay Online</button>
       </div>
     </div>
   );
