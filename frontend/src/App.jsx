@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -14,36 +14,39 @@ import Cart from './pages/Cart'
 import Profile from './pages/Profile'
 import ProtectedRoute from "./components/ProtectedRoute";
 import Footer from './components/Footer'
-// import { AuthProvider } from "./context/AuthContext
 import AuthProvider from "./context/AuthContext";
-import YourRoutes from "./components/ProtectedRoute";
 import CartProvider from "./context/CartContext";
 import Checkout from './pages/Checkout'
 import { Toaster } from "react-hot-toast";
 // admin side 
-import AdminSidebar from "./pages/Admin/AdminSidebar";
-import AdminNavbar from "./pages/Admin/AdminNavbar";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminProducts from "./pages/Admin/AdminProducts";
 import AdminOrders from "./pages/Admin/AdminOrders";
-import AdminUsers  from "./pages/Admin/AdminUsers";
+import AdminUsers from "./pages/Admin/AdminUsers";
 import AdminLogin from "./pages/Admin/AdminLogin";
-import AdminSettings from "./pages/Admin/AdminSettings";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminLayout from "./layouts/AdminLayout";
-
+import AdminFeatures from './pages/Admin/AdminFeatures'
 
 const App = () => {
+  const location = useLocation();
+
+  // 👇 Check kar rahe hain agar route admin se related hai
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <>
-      {/* <YourRoutesOrComponents />  */}
-      <Toaster position="top-center" reverseOrder={false} />  {/* like alert */}
+      <Toaster position="top-center" reverseOrder={false} />
 
       <AuthProvider>
         <CartProvider>
-          <Navbar />
+
+          {/* 👇 Navbar sirf tabhi dikhayenge jab admin route nahi ho */}
+          {!isAdminRoute && <Navbar />}
+
           <div className="p-6">
             <Routes>
+              {/* User Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
@@ -54,23 +57,15 @@ const App = () => {
               <Route path="/moreproduct" element={<MoreProduct />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-              {/* <Route path="/orders" element={<Orders/>} /> */}
+              <Route path="/admin/features" element={<AdminFeatures />} />
 
 
-              {/* 👇 Protected routes */}
+              {/* Protected User Routes */}
               <Route
                 path="/orders"
                 element={
                   <ProtectedRoute>
                     <Orders />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/cart"
-                element={
-                  <ProtectedRoute>
-                    <Cart />
                   </ProtectedRoute>
                 }
               />
@@ -83,8 +78,7 @@ const App = () => {
                 }
               />
 
-
-              {/* Admin routes */}
+              {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route
                 path="/admin/dashboard"
@@ -116,6 +110,7 @@ const App = () => {
                   </AdminProtectedRoute>
                 }
               />
+              
               <Route
                 path="/admin/users"
                 element={
@@ -126,21 +121,12 @@ const App = () => {
                   </AdminProtectedRoute>
                 }
               />
-
-
-
-
-
             </Routes>
           </div>
-          {/* <About />
-        <Contact /> */}
-          {/* <Footer /> */}
         </CartProvider>
       </AuthProvider>
-
     </>
   )
 }
 
-export default App
+export default App;

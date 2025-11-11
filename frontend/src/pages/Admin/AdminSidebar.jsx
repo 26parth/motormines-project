@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Package, ShoppingCart, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Users, LogOut, Star } from "lucide-react"; // 👈 Star icon for Features
 
 const AdminSidebar = () => {
   const links = [
@@ -8,6 +8,7 @@ const AdminSidebar = () => {
     { name: "Products", path: "/admin/products", icon: <Package size={20} /> },
     { name: "Orders", path: "/admin/orders", icon: <ShoppingCart size={20} /> },
     { name: "Users", path: "/admin/users", icon: <Users size={20} /> },
+    { name: "Features", path: "/admin/features", icon: <Star size={20} /> }, // ✅ New Feature Link
   ];
 
   return (
@@ -33,7 +34,7 @@ const AdminSidebar = () => {
 
       <button className="flex items-center gap-3 px-4 py-2 mt-10 bg-red-600 hover:bg-red-700 rounded-md transition">
         <LogOut size={20} />
-        Logout
+        AdminLogout
       </button>
     </div>
   );

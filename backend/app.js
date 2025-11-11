@@ -1,8 +1,8 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');  // 👈 ADD THIS //without relaod data lane ke liye !
 const cookieParser = require('cookie-parser');
 const path = require('path');
-const cors = require('cors');  // 👈 ADD THIS //without relaod data lane ke liye !
 const db = require("./config/mongoose-connection");
 require("dotenv").config();
 const productsRouter = require("./routes/productsRouter");
@@ -11,6 +11,7 @@ const paymentRouter = require("./routes/paymentRouter");
 const orderRouter = require("./routes/orderRouter");
 const cartRoutes = require("./routes/cartRouter");
 const adminRouter = require("./routes/adminRouter"); // 👈 Admin router hai bro !!!
+const featureRouter = require("./routes/featureRouter");
 // 🧩 Middlewares
 // const cors = require("cors");
 
@@ -20,9 +21,10 @@ app.use(
     credentials: true,                 // 👈 allow cookies + auth
   })
 ); // 👈 Allow frontend (React) to call backend
+
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 // 🏠 Test route
@@ -44,6 +46,9 @@ app.use("/cart", cartRoutes);
 
 // 👑 Admin routes
 app.use("/api/admin", adminRouter);  // ✅ All admin auth routes like login, refresh, logout
+
+// About.jsx mai jo 4 product hai use change karne ke liye !!
+app.use("/api/features", featureRouter);
 
 
 // 🚀 Start server

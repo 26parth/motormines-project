@@ -4,15 +4,20 @@ const Admin = require("../models/admin-model");
 const adminMiddleware = async (req, res, next) => {
   try {
     const token = req.cookies?.access_token;
-    if (!token) return res.status(401).json({ success: false, message: "Not authenticated" });
+    if (!token)
+      return res.status(401).json({ success: false, message: "Not authenticated" });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // ✅ admin ke liye alag secret use karo
+    const decoded = jwt.verify(token, process.env.ADMIN_JWT_SECRET);
+
     const admin = await Admin.findById(decoded.id);
-    if (!admin || !admin.isAdmin) return res.status(403).json({ success: false, message: "Admin only" });
+    if (!admin || !admin.isAdmin)
+      return res.status(403).json({ success: false, message: "Admin only" });
 
     req.admin = admin;
     next();
   } catch (err) {
+    console.error("Admin auth error:", err.message);
     return res.status(401).json({ success: false, message: "Auth failed" });
   }
 };

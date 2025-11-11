@@ -131,9 +131,10 @@ exports.loginUser = async (req, res) => {
 // 4️⃣ If login successful → create JWT token
 const token = jwt.sign(
   { id: user._id, email: user.email },
-  "MOTORMINES_SECRET_KEY", // secret key (store in .env ideally)
-  { expiresIn: "7d" } // valid for 7 days
+  process.env.USER_JWT_SECRET,   // ✅ user ke liye alag secret
+  { expiresIn: "7d" }
 );
+
 
 // Send token in cookie (HTTP-only)
 res

@@ -1,13 +1,12 @@
 // frontend/src/components/AdminProtectedRoute.jsx
-import React, { useContext } from "react";
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
 
 const AdminProtectedRoute = ({ children }) => {
-  const { user } = useContext(AuthContext);
+  const adminInfo = localStorage.getItem("adminInfo");
 
-  if (!user || !user.isAdmin) {
-    // Not logged in or not admin
+  if (!adminInfo) {
+    // Agar admin login info nahi hai
     return <Navigate to="/admin/login" replace />;
   }
 

@@ -2,8 +2,10 @@ const Order = require("../models/order-model");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
-// ✅ COD order create
-exports.createCodOrder = async (req, res) => {
+// ==========================
+// 🧾 Create COD Order
+// ==========================
+const createCodOrder = async (req, res) => {
   try {
     const { items, shippingAddress, totalAmount } = req.body;
 
@@ -26,8 +28,10 @@ exports.createCodOrder = async (req, res) => {
   }
 };
 
-// ✅ Razorpay order create
-exports.createRazorpayOrder = async (req, res) => {
+// ==========================
+// 💳 Create Razorpay Order
+// ==========================
+const createRazorpayOrder = async (req, res) => {
   try {
     const razorpay = new Razorpay({
       key_id: process.env.RAZORPAY_KEY_ID,
@@ -48,8 +52,10 @@ exports.createRazorpayOrder = async (req, res) => {
   }
 };
 
-// ✅ Verify Razorpay payment
-exports.verifyPayment = async (req, res) => {
+// ==========================
+// ✅ Verify Razorpay Payment
+// ==========================
+const verifyPayment = async (req, res) => {
   try {
     const {
       razorpay_order_id,
@@ -70,7 +76,6 @@ exports.verifyPayment = async (req, res) => {
     if (!isValid)
       return res.status(400).json({ success: false, message: "Invalid signature" });
 
-    // ✅ Create order after payment success
     const order = await Order.create({
       user: req.user._id,
       items: orderItems,
@@ -92,13 +97,40 @@ exports.verifyPayment = async (req, res) => {
   }
 };
 
-// ✅ Get user's all orders (for My Orders page)
-exports.getUserOrders = async (req, res) => {
+// ==========================
+// 🧑‍💼 Get All Orders (Admin)
+// ==========================
+// const getAllOrders = async (req, res) => {
+//   try {
+//     const orders = await Order.find()
+//       .populate("user", "name email")
+//       .sort({ createdAt: -1 });
+
+//     res.json({ success: true, orders });
+//   } catch (err) {
+//     console.error("Get All Orders Error:", err);
+//     res.status(500).json({ success: false, message: "Failed to fetch all orders" });
+//   }
+// };
+
+// ==========================
+// 👤 Get Orders for Logged-in User
+// ==========================
+const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json({ success: true, orders });
   } catch (err) {
-    console.error("Get Orders Error:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch orders" });
+    console.error("Get User Orders Error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch user orders" });
   }
 };
+
+// ✅ Export Everything
+module.exports = {
+  createCodOrder,
+  createRazorpayOrder,
+  verifyPayment,
+  getUserOrders,
+};
+

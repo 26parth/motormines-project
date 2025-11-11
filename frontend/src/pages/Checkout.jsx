@@ -74,7 +74,7 @@ const Checkout = () => {
     setProcessing(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/orders/create-cod",
+      "http://localhost:3000/api/create-cod",
         {
           items: itemsForBackend,
           shippingAddress: savedAddress,

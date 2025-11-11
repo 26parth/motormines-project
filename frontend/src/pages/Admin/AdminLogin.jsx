@@ -19,7 +19,8 @@ const AdminLogin = () => {
 
       if (data.success) {
         toast.success("Logged in successfully");
-        navigate("AdminDashboard.jsx"); // admin dashboard
+        localStorage.setItem("adminInfo", JSON.stringify(data.admin));
+        navigate("/admin/dashboard"); // admin dashboard
       } else {
         toast.error(data.message || "Login failed");
       }
