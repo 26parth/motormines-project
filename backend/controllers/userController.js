@@ -158,6 +158,34 @@ res
     });
   }
 };
+
+// ✅ Update User Profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { fullname, email, contact } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { fullname, email, contact },
+      { new: true }
+    ).select("-password");
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully ✅",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error("Update profile error:", err);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating profile",
+    });
+  }
+};
+
+
 exports.logoutUser = (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,

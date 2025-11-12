@@ -26,7 +26,7 @@ import AdminUsers from "./pages/Admin/AdminUsers";
 import AdminLogin from "./pages/Admin/AdminLogin";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminLayout from "./layouts/AdminLayout";
-import AdminFeatures from './pages/Admin/AdminFeatures'
+import AdminAddabout from './pages/Admin/AdminaddAbout'
 
 const App = () => {
   const location = useLocation();
@@ -57,7 +57,6 @@ const App = () => {
               <Route path="/moreproduct" element={<MoreProduct />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-              <Route path="/admin/features" element={<AdminFeatures />} />
 
 
               {/* Protected User Routes */}
@@ -106,6 +105,17 @@ const App = () => {
                   <AdminProtectedRoute>
                     <AdminLayout>
                       <AdminProducts />
+                    </AdminLayout>
+                  </AdminProtectedRoute>
+                }
+              />
+
+               <Route
+                path="/admin/addabout"
+                element={
+                  <AdminProtectedRoute>
+                    <AdminLayout>
+                     <AdminAddabout/>
                     </AdminLayout>
                   </AdminProtectedRoute>
                 }

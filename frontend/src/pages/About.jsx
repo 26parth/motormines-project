@@ -1,113 +1,133 @@
+// frontend/src/pages/About.jsx
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 
 const About = () => {
-  const navigate = useNavigate();
-  const [features, setFeatures] = useState([]);
-  const [products, setProducts] = useState([]); // ✅ Added
+  const [addabouts, setAddabouts] = useState([]);
 
-  // fetch features (already working)
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/admin/features")
-      .then((res) => setFeatures(res.data.features))
-      .catch(() => console.log("Error fetching features"));
-  }, []);
-
-  // ✅ fetch products
-  useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/products")
-      .then((res) => setProducts(res.data.products))
-      .catch(() => console.log("Error fetching products"));
+      .get("http://localhost:3000/api/addabout")
+      .then((res) => setAddabouts(res.data.features))
+      .catch(() => console.log("Error fetching addabout"));
   }, []);
 
   return (
     <>
-      <div className="bg-white py-4 px-4 sm:px-6 lg:px-8">
-        {/* ======= WHY CHOOSE SECTION ======= */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800 rounded-md shadow-md py-3">
-            Why Choose MotorMines Submersible Pumps
-          </h2>
+      {/* SECTION 1 - Static Icons (Why Choose MotorMines) */}
+      <div className="bg-white py-16 px-6 sm:px-10 lg:px-20">
+        <h2 className="text-3xl font-bold text-center mb-14 text-gray-900">
+          Why To Choose MotorMines
+        </h2>
 
-          <div className="flex flex-col md:flex-row justify-center items-center gap-10 md:gap-16">
-            {features.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.2, duration: 0.6 }}
-                viewport={{ once: true }}
-                onClick={() => navigate(item.path)}
-                className="flex flex-col items-center text-center cursor-pointer group transition-transform duration-300 hover:scale-105"
-              >
-                <div className="w-24 h-24 md:w-28 md:h-28 flex items-center justify-center rounded-full bg-blue-50 shadow-md group-hover:bg-blue-100 transition">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
+          {/* Card 1 */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="flex flex-col items-center"
+          >
+            <div className="w-40 h-40 border-2 border-blue-600 rounded-full flex items-center justify-center mb-4">
+              <img
+                src="/images/High-Suction-Capacity.jpg"
+                alt="High Suction Capacity"
+                className="w-38 h-38 object-contain"
+              />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              High Suction Capacity
+            </h3>
+          </motion.div>
+
+          {/* Card 2 */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            viewport={{ once: true }}
+            className="flex flex-col items-center"
+          >
+            <div className="w-40 h-40 border-2 border-blue-600 rounded-full flex items-center justify-center mb-4">
+              <img
+                src="\images\wide-voltage-design.jpg"
+                alt="Wide Voltage Operation"
+                className="w-38 h-38 object-contain"
+              />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              Wide Voltage Operation
+            </h3>
+          </motion.div>
+
+          {/* Card 3 */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            viewport={{ once: true }}
+            className="flex flex-col items-center"
+          >
+            <div className="w-40 h-40 border-2 border-blue-600 rounded-full flex items-center justify-center mb-4">
+              <img
+                src="\images\easy maintenance.jpg"
+                alt="Easy Maintenance"
+                className="w-38 h-38 object-contain"
+              />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              Easy Maintenance
+            </h3>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* SECTION 2 - Dynamic (Admin Addabout Data) */}
+      <div className="bg-gray-50 py-16 px-6 sm:px-10 lg:px-20">
+        <h2 className="text-3xl font-bold text-center mb-14 text-gray-900">
+          Our Products
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          {addabouts.map((item, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.2, duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
+            >
+              <div className="flex flex-col md:flex-row h-full">
+                <div className="md:w-1/2 h-60 md:h-auto overflow-hidden">
                   <img
-                    src={item.image} // ✅ changed from item.img → item.image
+                    src={item.image}
                     alt={item.title}
-                    className="w-12 h-12 object-contain"
+                    className="w-full h-full object-cover"
                   />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-gray-800 group-hover:text-blue-600">
-                  {item.title}
-                </h3>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* ======= PRODUCT BOX SECTION ======= */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-800 mt-32">
-            Our Featured Pump Categories
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-            {products.map((product, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2, duration: 0.7 }}
-                viewport={{ once: true }}
-                className="bg-white shadow-lg rounded-2xl overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
-              >
-                <img
-                  src={product.img}
-                  alt={product.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-5 text-center">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                    {product.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">{product.desc}</p>
-
-                  <Link
-                    to="/moreproduct"
-                    className="text-blue-600 font-semibold hover:underline"
+                <div className="p-6 flex flex-col justify-between md:w-1/2">
+                  <div>
+                    <h3 className="text-xl font-semibold text-blue-700 mb-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-gray-700 mb-4">
+                      {item.description?.slice(0, 250)}...
+                    </p>
+                  </div>
+                  <a
+                    href={item.path}
+                    className="text-blue-700 font-semibold hover:underline mt-2"
                   >
-                    MoreProduct
-                  </Link>
+                    View all products →
+                  </a>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </>
   );

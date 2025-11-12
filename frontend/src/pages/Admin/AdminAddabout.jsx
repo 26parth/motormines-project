@@ -1,41 +1,44 @@
+// frontend/src/pages/Admin/AdminAddabout.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const AdminFeatures = () => {
-  const [features, setFeatures] = useState([]);
+const AdminAddabout = () => {
+  const [addabouts, setAddabouts] = useState([]);
   const [form, setForm] = useState({ title: "", image: "", path: "" });
   const [editingId, setEditingId] = useState(null);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("adminToken");
 
-  const fetchFeatures = async () => {
-    const res = await axios.get("http://localhost:3000/api/admin/features", {
+  const fetchAddabouts = async () => {
+    const res = await axios.get("http://localhost:3000/api/admin/addabout", {
       headers: { Authorization: `Bearer ${token}` },
     });
-    if (res.data.success) setFeatures(res.data.features);
+    if (res.data.success) setAddabouts(res.data.features);
   };
 
-  useEffect(() => { fetchFeatures(); }, []);
+  useEffect(() => {
+    fetchAddabouts();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(`http://localhost:3000/api/admin/features/${editingId}`, form, {
+        await axios.put(`http://localhost:3000/api/admin/addabout/${editingId}`, form, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        toast.success("Feature updated!");
+        toast.success("Addabout updated!");
       } else {
-        await axios.post("http://localhost:3000/api/admin/features", form, {
+        await axios.post("http://localhost:3000/api/admin/addabout", form, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        toast.success("Feature added!");
+        toast.success("Addabout added!");
       }
       setForm({ title: "", image: "", path: "" });
       setEditingId(null);
-      fetchFeatures();
+      fetchAddabouts();
     } catch (err) {
-      toast.error("Failed to save feature!");
+      toast.error("Failed to save addabout!");
     }
   };
 
@@ -45,21 +48,24 @@ const AdminFeatures = () => {
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:3000/api/admin/features/${id}`, {
+    await axios.delete(`http://localhost:3000/api/admin/addabout/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    toast.success("Feature deleted!");
-    fetchFeatures();
+    toast.success("Deleted!");
+    fetchAddabouts();
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Manage Features</h1>
+      <h1 className="text-2xl font-bold mb-4">Manage About Section</h1>
 
       <form onSubmit={handleSubmit} className="mb-6 flex flex-wrap gap-2">
-        <input className="border p-1" placeholder="Title" value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} />
-        <input className="border p-1" placeholder="Image URL" value={form.image} onChange={(e) => setForm({...form, image: e.target.value})} />
-        <input className="border p-1" placeholder="Path (e.g. /anti-rust)" value={form.path} onChange={(e) => setForm({...form, path: e.target.value})} />
+        <input className="border p-1" placeholder="Title"
+          value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        <input className="border p-1" placeholder="Image URL (/images/anti-rust.webp)"
+          value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
+        <input className="border p-1" placeholder="Path (e.g. /anti-rust)"
+          value={form.path} onChange={(e) => setForm({ ...form, path: e.target.value })} />
         <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded">
           {editingId ? "Update" : "Add"}
         </button>
@@ -75,7 +81,7 @@ const AdminFeatures = () => {
           </tr>
         </thead>
         <tbody>
-          {features.map((f) => (
+          {addabouts.map((f) => (
             <tr key={f._id}>
               <td className="p-2 border"><img src={f.image} alt={f.title} className="w-12 h-12 object-cover rounded" /></td>
               <td className="p-2 border">{f.title}</td>
@@ -92,4 +98,4 @@ const AdminFeatures = () => {
   );
 };
 
-export default AdminFeatures;
+export default AdminAddabout;

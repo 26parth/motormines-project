@@ -4,7 +4,7 @@ const {
   adminLogin, refreshToken, logout,
   getAllUsers, getAllOrders,
   getAllProducts, addProduct, updateProduct, deleteProduct,
-  getAllFeatures, addFeature, updateFeature, deleteFeature
+  getAllAddabout, addAddabout, updateAddabout, deleteAddabout,
 } = require("../controllers/adminController");
 
 const router = express.Router();
@@ -12,7 +12,7 @@ const router = express.Router();
 // 🔐 Auth Routes
 router.post("/login", adminLogin);
 router.post("/refresh", refreshToken);
-router.post("/logout", adminMiddleware, logout);
+router.post("/logout", logout);
 
 // 👥 Users
 router.get("/users", adminMiddleware, getAllUsers);
@@ -26,11 +26,11 @@ router.post("/products", adminMiddleware, addProduct);
 router.put("/products/:id", adminMiddleware, updateProduct);
 router.delete("/products/:id", adminMiddleware, deleteProduct);
 
-// 🌟 Features
-router.get("/features", adminMiddleware, getAllFeatures);
-router.post("/features", adminMiddleware, addFeature);
-router.put("/features/:id", adminMiddleware, updateFeature);
-router.delete("/features/:id", adminMiddleware, deleteFeature);
+// 🧩 Addabout Routes
+router.get("/addabout", adminMiddleware, getAllAddabout);
+router.post("/addabout", adminMiddleware, addAddabout);
+router.put("/addabout/:id", adminMiddleware, updateAddabout);
+router.delete("/addabout/:id", adminMiddleware, deleteAddabout);
 
 
 module.exports = router;

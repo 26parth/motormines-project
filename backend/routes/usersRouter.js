@@ -8,15 +8,12 @@ router.post("/register", userController.registerUser);
 router.post("/login", userController.loginUser);
 router.post("/logout", userController.logoutUser);
 
-router.put("/address", protect, userController.updateAddress); // adress store karne ke liye 
-// 🧩 Protected Route (only logged-in user can access)
+// 🧩 Protected Routes (login required)
 router.get("/profile", protect, (req, res) => {
-  res.json({
-    success: true,
-    user: req.user, // middleware se milta hai
-  });
+  res.json({ success: true, user: req.user }); // ✅ closed properly
 });
-router.put("/address", protect, userController.updateAddress);
 
+router.put("/profile", protect, userController.updateProfile); // ✅ moved outside, correct place
+router.put("/address", protect, userController.updateAddress);
 
 module.exports = router;

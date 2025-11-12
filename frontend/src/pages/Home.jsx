@@ -13,7 +13,7 @@ const Home = () => {
     <> 
     <div
       className="h-screen bg-cover bg-center flex flex-col items-center justify-center text-white"
-      style={{ backgroundImage: "url('/images/main motor pumps.jpeg')" }}
+      style={{ backgroundImage: "url('/images/main-motormines-pumps.jpg')" }}
     >
       {/* Dark overlay for readability */}
       <div className="bg-black-transparant p-10 text-center  ">

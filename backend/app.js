@@ -11,7 +11,13 @@ const paymentRouter = require("./routes/paymentRouter");
 const orderRouter = require("./routes/orderRouter");
 const cartRoutes = require("./routes/cartRouter");
 const adminRouter = require("./routes/adminRouter"); // 👈 Admin router hai bro !!!
-const featureRouter = require("./routes/featureRouter");
+const PORT = process.env.PORT || 3000;
+
+
+  // import axios from "axios";                // pata nahi chatGPT
+  // axios.defaults.withCredentials = true;
+
+const { getAddaboutPublic } = require("./controllers/adminController"); // 👈 Import
 // 🧩 Middlewares
 // const cors = require("cors");
 
@@ -25,7 +31,9 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
+app.use("/images", express.static(path.join(__dirname, "../frontend/public/images")));
+
+// app.use(express.static(path.join(__dirname, "public")));
 
 // 🏠 Test route
 app.get("/", (req, res) => {
@@ -48,10 +56,9 @@ app.use("/cart", cartRoutes);
 app.use("/api/admin", adminRouter);  // ✅ All admin auth routes like login, refresh, logout
 
 // About.jsx mai jo 4 product hai use change karne ke liye !!
-app.use("/api/features", featureRouter);
 
 
 // 🚀 Start server
-app.listen(3000, () => {
-  console.log("✅ Server running at http://localhost:3000");
+app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
 });

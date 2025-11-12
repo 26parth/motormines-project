@@ -3,16 +3,19 @@ const User = require("../models/user-model");
 const Order = require("../models/order-model");
 const jwt = require("jsonwebtoken");
 const Product = require("../models/product-model");
-const Feature = require("../models/feature-model");
+const Addabout = require("../models/addabout-model");
 
 // Environment variables: JWT_SECRET, REFRESH_SECRET
-const ACCESS_EXPIRES = "15m";
+const ACCESS_EXPIRES = "7d";
 const REFRESH_EXPIRES = "30d";
 
-// Helper: generate JWT
+// ✅ Helper function: generate JWT
 const generateToken = (payload, secret, expiresIn) => {
   return jwt.sign(payload, secret, { expiresIn });
 };
+
+// ✅ Example usage (admin login ke time):
+const token = generateToken({ id: admin._id }, process.env.JWT_SECRET, "7d");
 
 // ===============================
 // 🔐 ADMIN LOGIN
@@ -37,14 +40,15 @@ exports.adminLogin = async (req, res) => {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-      maxAge: 15 * 60 * 1000,
+     maxAge: 7 * 24 * 60 * 60 * 1000
+
     });
 
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000
     });
 
     // ✅ Send response back
@@ -75,14 +79,15 @@ exports.refreshToken = (req, res) => {
 
     const decoded = jwt.verify(rtoken, process.env.REFRESH_SECRET);
     const payload = { id: decoded.id, role: "admin" };
-   const newAccessToken = generateToken(payload, process.env.ADMIN_JWT_SECRET, ACCESS_EXPIRES);
+    const newAccessToken = generateToken(payload, process.env.ADMIN_JWT_SECRET, ACCESS_EXPIRES);
 
 
     res.cookie("access_token", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 15 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000
+
     });
 
     return res.json({ success: true, message: "Access token refreshed" });
@@ -94,10 +99,24 @@ exports.refreshToken = (req, res) => {
 // ===============================
 // 🚪 LOGOUT
 // ===============================
+// 🚪 LOGOUT
 exports.logout = (req, res) => {
-  res.clearCookie("access_token");
-  res.clearCookie("refresh_token");
-  res.json({ success: true, message: "Logged out successfully" });
+  try {
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+    res.clearCookie("refresh_token", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
+    return res.json({ success: true, message: "Admin logged out successfully" });
+  } catch (err) {
+    console.error("Logout error:", err);
+    return res.status(500).json({ success: false, message: "Server error during logout" });
+  }
 };
 
 // ===============================
@@ -189,115 +208,76 @@ exports.deleteProduct = async (req, res) => {
 
 // About.jsx mai jo pehle 4 product hai iska code 
 
-const Feature = require("../models/feature-model");
 
 // ===============================
-// 🌟 ADMIN → FETCH ALL FEATURES
+// 📦 ADDABOUT (Public + Admin)
 // ===============================
-exports.getAllFeatures = async (req, res) => {
+
+// Public: get all About features (for About.jsx)
+exports.getAddaboutPublic = async (req, res) => {
   try {
-    const features = await Feature.find().sort({ createdAt: -1 });
-    res.json({ success: true, features });
+    const features = await Addabout.find().sort({ createdAt: -1 });
+    return res.json({ success: true, features });
   } catch (err) {
-    console.error("Admin getAllFeatures error:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch features" });
+    console.error("Get Addabout (public) error:", err);
+    return res.status(500).json({ success: false, message: "Failed to fetch addabout" });
   }
 };
 
-// 🌟 ADD FEATURE
-exports.addFeature = async (req, res) => {
+// Admin: get all
+exports.getAllAddabout = async (req, res) => {
   try {
-    const { title, image, path } = req.body;
-    const newFeature = await Feature.create({ title, image, path });
-    res.json({ success: true, feature: newFeature, message: "Feature added successfully" });
+    const features = await Addabout.find().sort({ createdAt: -1 });
+    return res.json({ success: true, features });
   } catch (err) {
-    console.error("Admin addFeature error:", err);
-    res.status(500).json({ success: false, message: "Failed to add feature" });
+    console.error("Get Addabout (admin) error:", err);
+    return res.status(500).json({ success: false, message: "Failed to fetch addabout" });
   }
 };
 
-// 🌟 UPDATE FEATURE
-exports.updateFeature = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updated = await Feature.findByIdAndUpdate(id, req.body, { new: true });
-    res.json({ success: true, feature: updated, message: "Feature updated successfully" });
-  } catch (err) {
-    console.error("Admin updateFeature error:", err);
-    res.status(500).json({ success: false, message: "Failed to update feature" });
-  }
-};
-
-// 🌟 DELETE FEATURE
-exports.deleteFeature = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await Feature.findByIdAndDelete(id);
-    res.json({ success: true, message: "Feature deleted successfully" });
-  } catch (err) {
-    console.error("Admin deleteFeature error:", err);
-    res.status(500).json({ success: false, message: "Failed to delete feature" });
-  }
-};
-
-
-//About.jsx mai product show karane kai liye 
-// ===============================
-// 📦 Get All Features (Public)
-// ===============================
-exports.getFeatures = async (req, res) => {
-  try {
-    const features = await Feature.find().sort({ createdAt: -1 });
-    res.json({ success: true, count: features.length, features });
-  } catch (err) {
-    console.error("Get Features error:", err);
-    res.status(500).json({ success: false, message: "Failed to fetch features" });
-  }
-};
-
-// ===============================
-// ➕ Add New Feature (Admin only)
-// ===============================
-exports.addFeature = async (req, res) => {
+// Admin: add
+exports.addAddabout = async (req, res) => {
   try {
     const { title, description, image, path } = req.body;
     if (!title) return res.status(400).json({ success: false, message: "Title required" });
 
-    const newFeature = await Feature.create({ title, description, image, path });
-    res.status(201).json({ success: true, feature: newFeature });
+    const newAbout = await Addabout.create({
+      title,
+      description: description || "",
+      image: image || "",
+      path: path || "/",
+    });
+
+    return res.status(201).json({ success: true, feature: newAbout });
   } catch (err) {
-    console.error("Add Feature error:", err);
-    res.status(500).json({ success: false, message: "Failed to add feature" });
+    console.error("Add addabout error:", err);
+    return res.status(500).json({ success: false, message: "Failed to add addabout" });
   }
 };
 
-// ===============================
-// ✏️ Update Feature (Admin only)
-// ===============================
-exports.updateFeature = async (req, res) => {
+// Admin: update
+exports.updateAddabout = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
-    const updated = await Feature.findByIdAndUpdate(id, updates, { new: true });
-    if (!updated) return res.status(404).json({ success: false, message: "Feature not found" });
-    res.json({ success: true, feature: updated });
+    const updated = await Addabout.findByIdAndUpdate(id, updates, { new: true });
+    if (!updated) return res.status(404).json({ success: false, message: "Not found" });
+    return res.json({ success: true, feature: updated });
   } catch (err) {
-    console.error("Update Feature error:", err);
-    res.status(500).json({ success: false, message: "Failed to update feature" });
+    console.error("Update addabout error:", err);
+    return res.status(500).json({ success: false, message: "Failed to update addabout" });
   }
 };
 
-// ===============================
-// 🗑️ Delete Feature (Admin only)
-// ===============================
-exports.deleteFeature = async (req, res) => {
+// Admin: delete
+exports.deleteAddabout = async (req, res) => {
   try {
     const { id } = req.params;
-    const deleted = await Feature.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ success: false, message: "Feature not found" });
-    res.json({ success: true, message: "Feature deleted" });
+    const deleted = await Addabout.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ success: false, message: "Not found" });
+    return res.json({ success: true, message: "Deleted" });
   } catch (err) {
-    console.error("Delete Feature error:", err);
-    res.status(500).json({ success: false, message: "Failed to delete feature" });
+    console.error("Delete addabout error:", err);
+    return res.status(500).json({ success: false, message: "Failed to delete addabout" });
   }
 };
