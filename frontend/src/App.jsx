@@ -27,6 +27,7 @@ import AdminLogin from "./pages/Admin/AdminLogin";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminAddabout from './pages/Admin/AdminaddAbout'
+import "./api/axiosInstance.js";// 👇 Import axios instance to enable auto-refresh
 
 const App = () => {
   const location = useLocation();

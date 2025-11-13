@@ -5,17 +5,16 @@ const jwt = require("jsonwebtoken");
 const Product = require("../models/product-model");
 const Addabout = require("../models/addabout-model");
 
-// Environment variables: JWT_SECRET, REFRESH_SECRET
-const ACCESS_EXPIRES = "7d";
-const REFRESH_EXPIRES = "30d";
+
+
+// Token expiry
+const ACCESS_EXPIRES = "7d";    // 7 days
+const REFRESH_EXPIRES = "30d";  // 30 days
 
 // ✅ Helper function: generate JWT
 const generateToken = (payload, secret, expiresIn) => {
   return jwt.sign(payload, secret, { expiresIn });
 };
-
-// ✅ Example usage (admin login ke time):
-const token = generateToken({ id: admin._id }, process.env.JWT_SECRET, "7d");
 
 // ===============================
 // 🔐 ADMIN LOGIN
@@ -38,20 +37,18 @@ exports.adminLogin = async (req, res) => {
     // ✅ Set cookies
     res.cookie("access_token", accessToken, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-     maxAge: 7 * 24 * 60 * 60 * 1000
-
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.cookie("refresh_token", refreshToken, {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 30 * 24 * 60 * 60 * 1000
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
-    // ✅ Send response back
     return res.json({
       success: true,
       message: "Admin logged in successfully",
@@ -68,7 +65,6 @@ exports.adminLogin = async (req, res) => {
   }
 };
 
-
 // ===============================
 // 🔄 REFRESH TOKEN
 // ===============================
@@ -81,17 +77,16 @@ exports.refreshToken = (req, res) => {
     const payload = { id: decoded.id, role: "admin" };
     const newAccessToken = generateToken(payload, process.env.ADMIN_JWT_SECRET, ACCESS_EXPIRES);
 
-
     res.cookie("access_token", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     return res.json({ success: true, message: "Access token refreshed" });
   } catch (err) {
+    console.error("Refresh token error:", err.message);
     return res.status(401).json({ success: false, message: "Refresh failed" });
   }
 };
@@ -99,17 +94,16 @@ exports.refreshToken = (req, res) => {
 // ===============================
 // 🚪 LOGOUT
 // ===============================
-// 🚪 LOGOUT
 exports.logout = (req, res) => {
   try {
     res.clearCookie("access_token", {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
     });
     res.clearCookie("refresh_token", {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
     });
     return res.json({ success: true, message: "Admin logged out successfully" });

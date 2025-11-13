@@ -6,6 +6,8 @@ import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "axios";
+import api from "../api/axiosInstance";  // ✅ import yaha
+
 
 const MoreProduct = () => {
   const { user } = useContext(AuthContext);
@@ -13,9 +15,9 @@ const MoreProduct = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
 
-
 useEffect(() => {
-  axios.get("http://localhost:3000/api/admin/products")
+  // axios.get("http://localhost:3000/api/admin/products") 
+  api.get("/admin/products")   // ✅ auto token refresh enabled
     .then((res) => setProducts(res.data.products))
     .catch(() => console.log("Failed to fetch products"));
 }, []);
