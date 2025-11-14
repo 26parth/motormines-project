@@ -1,17 +1,21 @@
 // frontend/src/pages/About.jsx
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+// import axios from "axios";
+import api from "../api/axiosInstance"; // ✅ import yaha
 
 const About = () => {
-  const [addabouts, setAddabouts] = useState([]);
+  const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:3000/api/addabout")
-      .then((res) => setAddabouts(res.data.features))
-      .catch(() => console.log("Error fetching addabout"));
-  }, []);
+useEffect(() => {
+  api
+    .get("/admin/public/addabout") // bas relative path de
+    .then((res) => setProducts(res.data.features))
+    .catch(() => console.log("Error fetching products"));
+}, []);
 
   return (
     <>
@@ -84,14 +88,14 @@ const About = () => {
         </div>
       </div>
 
-      {/* SECTION 2 - Dynamic (Admin Addabout Data) */}
+      {/* SECTION 2 - Dynamic (Products Data) */}
       <div className="bg-gray-50 py-16 px-6 sm:px-10 lg:px-20">
         <h2 className="text-3xl font-bold text-center mb-14 text-gray-900">
           Our Products
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {addabouts.map((item, index) => (
+          {products.map((item, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 50 }}
@@ -104,25 +108,27 @@ const About = () => {
                 <div className="md:w-1/2 h-60 md:h-auto overflow-hidden">
                   <img
                     src={item.image}
-                    alt={item.title}
+                    alt={item.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="p-6 flex flex-col justify-between md:w-1/2">
                   <div>
                     <h3 className="text-xl font-semibold text-blue-700 mb-2">
-                      {item.title}
+                      {item.name}
                     </h3>
+                    <p className="text-sm text-gray-700 mb-2 font-medium">
+                      ₹ {item.price}
+                    </p>
                     <p className="text-sm text-gray-700 mb-4">
                       {item.description?.slice(0, 250)}...
                     </p>
                   </div>
-                  <a
-                    href={item.path}
-                    className="text-blue-700 font-semibold hover:underline mt-2"
-                  >
-                    View all products →
-                  </a>
+                  <button className="text-blue-700 font-semibold hover:underline mt-2"
+                  onClick={() => navigate("/moreproduct")}
+                  >   View moreproduct → 
+                   
+                  </button>
                 </div>
               </div>
             </motion.div>

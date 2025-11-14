@@ -5,9 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import axios from "axios";
-import api from "../api/axiosInstance";  // ✅ import yaha
-
+import api from "../api/axiosInstance";  // ✅ using secure axios instance
 
 const MoreProduct = () => {
   const { user } = useContext(AuthContext);
@@ -15,13 +13,12 @@ const MoreProduct = () => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
 
-useEffect(() => {
-  // axios.get("http://localhost:3000/api/admin/products") 
-  api.get("/admin/products")   // ✅ auto token refresh enabled
-    .then((res) => setProducts(res.data.products))
-    .catch(() => console.log("Failed to fetch products"));
-}, []);
-
+  useEffect(() => {
+    api
+      .get("/admin/products") // ✅ auto token refresh enabled
+      .then((res) => setProducts(res.data.products))
+      .catch(() => console.log("Failed to fetch products"));
+  }, []);
 
   const handleAddToCart = (product) => {
     if (!user) {
@@ -29,7 +26,17 @@ useEffect(() => {
       navigate("/login");
       return;
     }
-    addToCart(product);
+
+    // ✅ Fixed structure for backend compatibility
+    const formattedProduct = {
+      productId: product._id || product.id,
+      title: product.name,       // backend expects "title"
+      price: Number(String(product.price).replace(/[^0-9.]/g, "")), // clean price
+      img: product.image,        // backend expects "img"
+    };
+
+    console.log("🟡 Sending to backend:", formattedProduct);
+    addToCart(formattedProduct);  // ✅ send correct data
     toast.success(`${product.name} added to cart 🛒`);
   };
 
@@ -53,10 +60,16 @@ useEffect(() => {
             transition={{ duration: 0.5 }}
             className="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden flex flex-col"
           >
-            <img src={item.image} alt={item.name} className="w-full h-36 object-cover" />
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-full h-36 object-cover"
+            />
             <div className="p-3 flex flex-col justify-between flex-1 text-center">
               <div>
-                <h3 className="text-base font-semibold text-gray-800">{item.name}</h3>
+                <h3 className="text-base font-semibold text-gray-800">
+                  {item.name}
+                </h3>
                 <p className="text-xs text-gray-500 mt-1">{item.description}</p>
               </div>
               <div>
@@ -75,7 +88,13 @@ useEffect(() => {
                         navigate("/login");
                         return;
                       }
-                      addToCart(item);
+                      const formattedProduct = {
+                        productId: item._id || item.id,
+                        title: item.name,
+                        price: Number(String(item.price).replace(/[^0-9.]/g, "")),
+                        img: item.image,
+                      };
+                      addToCart(formattedProduct);
                       navigate("/checkout");
                     }}
                     className="flex items-center gap-1 text-sm bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700"

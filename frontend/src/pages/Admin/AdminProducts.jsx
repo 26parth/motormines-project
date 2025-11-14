@@ -13,9 +13,7 @@ const AdminProducts = () => {
   // 🧠 Fetch all products
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/admin/products", {
-        withCredentials: true,
-      });
+      const res = await api.get("/admin/products");   // ✅ replace axios.get
       if (res.data.success) setProducts(res.data.products);
       else toast.error("Failed to fetch products");
     } catch (error) {
@@ -40,13 +38,9 @@ const AdminProducts = () => {
     try {
       let res;
       if (editId) {
-        res = await axios.put(`http://localhost:3000/api/admin/products/${editId}`, form, {
-          withCredentials: true,
-        });
+         res = await api.put(`/admin/products/${editId}`, form);  // ✅ replace axios.put
       } else {
-        res = await axios.post("http://localhost:3000/api/admin/products", form, {
-          withCredentials: true,
-        });
+         res = await api.post("/admin/products", form);           // ✅ replace axios.post
       }
 
       if (res.data.success) {
@@ -77,9 +71,8 @@ const AdminProducts = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
     try {
-      const res = await axios.delete(`http://localhost:3000/api/admin/products/${id}`, {
-        withCredentials: true,
-      });
+      const res = await api.delete(`/admin/products/${id}`); 
+      
       if (res.data.success) {
         toast.success("Product Deleted!");
         fetchProducts();

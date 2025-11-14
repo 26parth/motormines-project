@@ -6,7 +6,7 @@ const {
   getAllProducts, addProduct, updateProduct, deleteProduct,
   getAllAddabout, addAddabout, updateAddabout, deleteAddabout,
 } = require("../controllers/adminController");
-
+const { getAllAddaboutPublic } = require("../controllers/adminController");
 const router = express.Router();
 
 // 🔐 Auth Routes
@@ -31,6 +31,5 @@ router.get("/addabout", adminMiddleware, getAllAddabout);
 router.post("/addabout", adminMiddleware, addAddabout);
 router.put("/addabout/:id", adminMiddleware, updateAddabout);
 router.delete("/addabout/:id", adminMiddleware, deleteAddabout);
-
-
+router.get("/public/addabout", getAllAddaboutPublic); // yaha se ham image add kar sakte hai !! isliye ye path diya hai !!
 module.exports = router;

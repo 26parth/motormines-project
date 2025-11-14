@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import anime from "animejs";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -7,110 +9,125 @@ const Contact = () => {
     message: "",
   });
 
+  useEffect(() => {
+    anime({
+      targets: ".contact-card",
+      scale: [0.8, 1],
+      opacity: [0, 1],
+      easing: "easeOutExpo",
+      duration: 800,
+    });
+
+    anime({
+      targets: ".glow",
+      opacity: [0, 0.4],
+      translateY: [-20, 0],
+      duration: 1500,
+      easing: "easeOutQuad",
+    });
+  }, []);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form Data Submitted:", formData);
-    alert("Thank you for contacting us! We’ll get back to you soon.");
+    alert("Message Sent Successfully!");
     setFormData({ name: "", email: "", message: "" });
   };
 
   return (
-    <div className="bg-gray-50 py-16 px-6 md:px-16 lg:px-32">
-      <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">
-        Contact Us
-      </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-100 p-6 relative overflow-hidden">
 
-      <div className="flex flex-col md:flex-row gap-10">
-        {/* LEFT SIDE - Contact Info */}
-        <div className="md:w-1/2 bg-white shadow-lg rounded-2xl p-8 flex flex-col justify-center">
-          <h3 className="text-2xl font-semibold mb-4 text-blue-700">
-            Get in Touch
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Have questions about our submersible pumps or need help choosing the
-            right one? We’d love to hear from you.
-          </p>
+      {/* Background Glowing Circles */}
+      <div className="absolute w-72 h-72 rounded-full bg-blue-500/30 blur-3xl top-10 left-10 glow"></div>
+      <div className="absolute w-72 h-72 rounded-full bg-purple-500/30 blur-3xl bottom-10 right-10 glow"></div>
 
-          <div className="space-y-4 text-gray-700">
-            <p>
-              <span className="font-semibold">📞 Phone:</span> +91 98765 43210
-            </p>
-            <p>
-              <span className="font-semibold">📧 Email:</span>{" "}
-              support@motormines.com
-            </p>
-            <p>
-              <span className="font-semibold">📍 Address:</span> 12 Industrial
-              Estate, Rajkot, Gujarat, India
-            </p>
-          </div>
-        </div>
+      {/* CARD */}
+      <motion.div
+        className="contact-card z-20 w-full max-w-2xl bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-2xl relative"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <h2 className="text-4xl font-bold text-center text-gray-800 mb-2">
+          Contact Us ✉️
+        </h2>
+        <p className="text-gray-600 text-center mb-8">
+          We're here to help you with <span className="text-blue-600 font-semibold">MotorMines</span>
+        </p>
 
-        {/* RIGHT SIDE - Feedback Form */}
-        <div className="md:w-1/2 bg-white shadow-lg rounded-2xl p-8">
-          <h3 className="text-2xl font-semibold mb-6 text-blue-700">
-            Send Us a Message
-          </h3>
+        <form onSubmit={handleSubmit} className="space-y-8">
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter your name"
-                required
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                required
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                Message / Feedback
-              </label>
-              <textarea
-                name="message"
-                value={formData.message}
-                onChange={handleChange}
-                placeholder="Write your message..."
-                required
-                rows="4"
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              ></textarea>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
+          {/* Input Group */}
+          <div className="relative group">
+            <input
+              type="text"
+              name="name"
+              required
+              value={formData.name}
+              onChange={handleChange}
+              className="peer w-full px-4 py-3 bg-white border border-gray-400 rounded-xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-300 transition-all"
+            />
+            <label
+              className="absolute left-4 top-3 text-gray-600 bg-white px-1 transition-all 
+              peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-500 
+              peer-focus:-top-2 peer-focus:text-sm peer-focus:text-blue-600"
             >
-              Submit
-            </button>
-          </form>
-        </div>
-      </div>
+              Your Name
+            </label>
+          </div>
+
+          <div className="relative group">
+            <input
+              type="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              className="peer w-full px-4 py-3 bg-white border border-gray-400 rounded-xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-300 transition-all"
+            />
+            <label
+              className="absolute left-4 top-3 text-gray-600 bg-white px-1 transition-all 
+              peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-500 
+              peer-focus:-top-2 peer-focus:text-sm peer-focus:text-blue-600"
+            >
+              Email Address
+            </label>
+          </div>
+
+          <div className="relative group">
+            <textarea
+              name="message"
+              rows="4"
+              required
+              value={formData.message}
+              onChange={handleChange}
+              className="peer w-full px-4 py-3 bg-white border border-gray-400 rounded-xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-300 transition-all"
+            ></textarea>
+
+            <label
+              className="absolute left-4 top-3 text-gray-600 bg-white px-1 transition-all 
+              peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-500 
+              peer-focus:-top-2 peer-focus:text-sm peer-focus:text-blue-600"
+            >
+              Message
+            </label>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="submit"
+            className="w-full py-3 rounded-xl text-white font-semibold text-lg 
+            bg-gradient-to-r from-blue-500 to-purple-600 
+            hover:from-purple-600 hover:to-blue-500 transition-all duration-300 shadow-lg"
+          >
+            Send Message
+          </motion.button>
+        </form>
+      </motion.div>
     </div>
   );
 };

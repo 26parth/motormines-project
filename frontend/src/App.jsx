@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'  // ✅ useState import
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
@@ -28,12 +28,22 @@ import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminAddabout from './pages/Admin/AdminaddAbout'
 import "./api/axiosInstance.js";// 👇 Import axios instance to enable auto-refresh
+import Intro from "./components/Intro.jsx";
+
 
 const App = () => {
   const location = useLocation();
 
   // 👇 Check kar rahe hain agar route admin se related hai
   const isAdminRoute = location.pathname.startsWith("/admin");
+
+  // ✅ State for intro animation
+  const [showIntro, setShowIntro] = useState(true);
+
+  // ✅ Agar intro chal raha hai to sirf Intro component show hoga
+  if (showIntro) {
+    return <Intro onFinish={() => setShowIntro(false)} />
+  }
 
   return (
     <>
@@ -58,7 +68,6 @@ const App = () => {
               <Route path="/moreproduct" element={<MoreProduct />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
-
 
               {/* Protected User Routes */}
               <Route

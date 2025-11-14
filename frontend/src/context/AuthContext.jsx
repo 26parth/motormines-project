@@ -1,5 +1,6 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import userApi from "../api/userApi";
 
 export const AuthContext = createContext();
 
@@ -7,38 +8,32 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Always send cookies with requests
-  axios.defaults.withCredentials = true;
-
-  // 🔹 Fetch user profile from backend
   const fetchProfile = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/users/profile");
-      if (res.data.success) {
-        setUser(res.data.user);
-      } else {
-        setUser(null);
-      }
+      const res = await userApi.get("/profile"); 
+      setUser(res.data.user || null);
     } catch (err) {
-      setUser(null); // ❗ ensure no old user stays
-      console.log("No active session");
+      // ✅ handle logout 401 silently
+      if (err.response?.status === 401) {
+        setUser(null);
+        console.log("User not logged in");
+      } else {
+        console.error("Profile fetch error:", err);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔹 Logout handler
-const logout = async () => {
-  try {
-    await axios.post("http://localhost:3000/users/logout", {}, { withCredentials: true });
-    setUser(null);  // ✅ clear state immediately
-  } catch (err) {
-    console.error("Logout error:", err);
-  }
-};
+  const logout = async () => {
+    try {
+      await userApi.post("/logout");
+      setUser(null);
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
-
-  // 🔹 Run on app start
   useEffect(() => {
     fetchProfile();
   }, []);

@@ -2,10 +2,10 @@
 const mongoose = require("mongoose");
 
 const addaboutSchema = new mongoose.Schema({
-  title: { type: String, required: true },
+  name: { type: String, required: true },         // 🟢 title → name
+  price: { type: Number, required: true },        // 🟢 path → price
   description: { type: String, default: "" },
-  image: { type: String, default: "" }, // e.g. "/images/anti-rust.webp"
-  path: { type: String, default: "/" },
+  image: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
 });
 

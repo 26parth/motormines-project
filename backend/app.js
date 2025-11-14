@@ -50,7 +50,8 @@ app.use("/payment", paymentRouter);
 
 app.use("/api", orderRouter);
 
-app.use("/cart", cartRoutes);
+app.use("/api/cart", cartRoutes);
+
 
 // 👑 Admin routes
 app.use("/api/admin", adminRouter);  // ✅ All admin auth routes like login, refresh, logout

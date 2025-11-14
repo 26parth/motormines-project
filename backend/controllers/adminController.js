@@ -230,22 +230,44 @@ exports.getAllAddabout = async (req, res) => {
 };
 
 // Admin: add
+
+// 🟢 Public: Get All Addabout
+exports.getAllAddaboutPublic = async (req, res) => {
+  try {
+    const addabouts = await Addabout.find();
+    res.json({ success: true, features: addabouts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to fetch addabout" });
+  }
+};
+
+
 exports.addAddabout = async (req, res) => {
   try {
-    const { title, description, image, path } = req.body;
-    if (!title) return res.status(400).json({ success: false, message: "Title required" });
+    const { name, price, image, description } = req.body;
 
+    // ✅ Validation
+    if (!name || !price) {
+      return res.status(400).json({ success: false, message: "Name and Price are required" });
+    }
+
+    // ✅ Create new Addabout entry
     const newAbout = await Addabout.create({
-      title,
-      description: description || "",
+      name,
+      price,
       image: image || "",
-      path: path || "/",
+      description: description || "",
     });
 
-    return res.status(201).json({ success: true, feature: newAbout });
-  } catch (err) {
-    console.error("Add addabout error:", err);
-    return res.status(500).json({ success: false, message: "Failed to add addabout" });
+    // ✅ Send response
+    return res.status(201).json({
+      success: true,
+      message: "Addabout item added successfully",
+      feature: newAbout,
+    });
+  } catch (error) {
+    console.error("❌ addAddabout error:", error);
+    return res.status(500).json({ success: false, message: "Server error during Addabout add" });
   }
 };
 

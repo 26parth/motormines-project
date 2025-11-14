@@ -1,8 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
+import { TextField, Button } from "@mui/material";
 import { AuthContext } from "../context/AuthContext";
+import userApi from "../api/userApi";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -11,36 +12,27 @@ const Login = () => {
   const navigate = useNavigate();
   const { user, fetchProfile } = useContext(AuthContext);
 
-  // ✅ Redirect logged-in user
   useEffect(() => {
     if (user) {
       navigate("/");
     }
   }, [user, navigate]);
 
-  // ✅ Input change handler
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Submit handler (Secure with backend cookies)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
     try {
-      
-      const res = await axios.post(
-        "http://localhost:3000/users/login",
-        formData,
-        { withCredentials: true }
-
-      );
+      const res = await userApi.post("/login", formData);
 
       if (res.data.success) {
-        await fetchProfile(); // 👈 fetch user from backend
-        navigate("/"); // redirect home
+        await fetchProfile();
+        navigate("/");
       } else {
         setMessage(res.data.message || "Invalid email or password");
       }
@@ -53,27 +45,29 @@ const Login = () => {
   };
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-50 overflow-hidden">
-      {/* Background bubbles */}
+    <div className="relative flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 overflow-hidden p-4">
+
+      {/* Background Animation Circles */}
       <motion.div
-        initial={{ y: 200, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 1 }}
-        className="absolute w-80 h-80 bg-blue-300/20 rounded-full blur-3xl -top-20 -left-20"
-      ></motion.div>
-      <motion.div
-        initial={{ y: -200, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+        initial={{ x: -200, y: -200, opacity: 0 }}
+        animate={{ x: 0, y: 0, opacity: 0.35 }}
         transition={{ duration: 1.2 }}
-        className="absolute w-80 h-80 bg-blue-500/20 rounded-full blur-3xl bottom-0 right-0"
-      ></motion.div>
+        className="absolute w-72 h-72 bg-blue-400/30 blur-3xl rounded-full top-0 left-0"
+      />
+
+      <motion.div
+        initial={{ x: 200, y: 200, opacity: 0 }}
+        animate={{ x: 0, y: 0, opacity: 0.35 }}
+        transition={{ duration: 1.4 }}
+        className="absolute w-72 h-72 bg-purple-500/30 blur-3xl rounded-full bottom-0 right-0"
+      />
 
       {/* Login Card */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.8, y: 40 }}
+        initial={{ opacity: 0, scale: 0.85, y: 40 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white/70 backdrop-blur-xl shadow-xl rounded-3xl p-8 w-full max-w-md border border-white/30"
+        className="relative z-10 w-full max-w-md bg-white/80 backdrop-blur-xl shadow-xl rounded-3xl p-8 sm:p-10 border border-white/40"
       >
         <h2 className="text-4xl font-extrabold text-center text-blue-700 mb-2">
           Welcome Back 👋
@@ -84,58 +78,57 @@ const Login = () => {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+
           {/* Email */}
-          <div>
-            <label className="text-sm text-gray-700 font-medium">Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              onChange={handleChange}
-              value={formData.email}
-              className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
-              required
-            />
-          </div>
+          <TextField
+            fullWidth
+            label="Email"
+            variant="outlined"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            className="!mb-4"
+          />
 
           {/* Password */}
-          <div>
-            <label className="text-sm text-gray-700 font-medium">Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              onChange={handleChange}
-              value={formData.password}
-              className="w-full p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition"
-              required
-            />
-          </div>
+          <TextField
+            fullWidth
+            label="Password"
+            variant="outlined"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+            className="!mb-4"
+          />
 
-          <div className="flex justify-between items-center text-sm mt-1">
+          <div className="flex justify-end text-sm mt-1">
             <Link to="/forgotpassword" className="text-blue-600 hover:underline">
               Forgot Password?
             </Link>
           </div>
 
-          {/* Button */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 rounded-lg font-semibold shadow-md transition ${
-              loading
-                ? "bg-gray-400"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}
+          {/* Submit Button */}
+          <motion.div
+            whileHover={!loading ? { scale: 1.05 } : {}}
+            whileTap={!loading ? { scale: 0.95 } : {}}
           >
-            {loading ? "Logging in..." : "Login"}
-          </motion.button>
+            <Button
+              fullWidth
+              type="submit"
+              disabled={loading}
+              variant="contained"
+              className="py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600"
+            >
+              {loading ? "Logging in..." : "Login"}
+            </Button>
+          </motion.div>
         </form>
 
         {message && (
-          <p className="text-center mt-4 text-sm font-medium text-gray-700">
+          <p className="text-center mt-4 text-sm font-medium text-red-500">
             {message}
           </p>
         )}
