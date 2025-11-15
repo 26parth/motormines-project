@@ -143,6 +143,8 @@ const App = () => {
               />
             </Routes>
           </div>
+          {/* 🔹 Footer sirf user pages me
+    {!isAdminRoute && <Footer />} */}
         </CartProvider>
       </AuthProvider>
     </>

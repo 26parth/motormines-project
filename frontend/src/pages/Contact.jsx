@@ -1,135 +1,114 @@
+// frontend/src/pages/Contact.jsx
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import anime from "animejs";
 
+// ✅ Note: Tumhara original form component bilkul untouched hai
+import ContactForm from "./ContactForm"; // tumhare form ko alag file mai export karo
+import Footer from "../components/Footer";
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
+    // background glow animation
+    useEffect(() => {
+        anime({
+            targets: ".background-glow",
+            scale: [0.8, 1.1],
+            opacity: [0, 0.4],
+            easing: "easeOutExpo",
+            duration: 1200,
+            loop: true,
+            direction: "alternate",
+        });
+    }, []);
 
-  useEffect(() => {
-    anime({
-      targets: ".contact-card",
-      scale: [0.8, 1],
-      opacity: [0, 1],
-      easing: "easeOutExpo",
-      duration: 800,
-    });
+    return (
+        <>
 
-    anime({
-      targets: ".glow",
-      opacity: [0, 0.4],
-      translateY: [-20, 0],
-      duration: 1500,
-      easing: "easeOutQuad",
-    });
-  }, []);
+        <div className="min-h-screen relative bg-gradient-to-br from-blue-50 via-white to-indigo-100 overflow-hidden">
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+            {/* 🌟 Background Glowing Circles */}
+            <div className="absolute w-72 h-72 rounded-full bg-blue-500/20 blur-3xl top-10 left-10 background-glow"></div>
+            <div className="absolute w-72 h-72 rounded-full bg-purple-500/20 blur-3xl bottom-10 right-10 background-glow"></div>
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert("Message Sent Successfully!");
-    setFormData({ name: "", email: "", message: "" });
-  };
+            {/* 🌐 Hero / Page Title */}
+            <div className="text-center py-16 px-6">
+                <h1 className="text-5xl font-bold text-gray-800 mb-4">Contact Us</h1>
+                <p className="text-gray-600 text-lg max-w-xl mx-auto">
+                    We'd love to hear from you! Reach out for support, feedback or any queries about <span className="text-blue-600 font-semibold">MotorMines</span>.
+                </p>
+            </div>
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-indigo-100 p-6 relative overflow-hidden">
+            <div className="max-w-7xl mx-auto px-6 md:px-16 lg:px-28 grid grid-cols-1 lg:grid-cols-2 gap-12">
 
-      {/* Background Glowing Circles */}
-      <div className="absolute w-72 h-72 rounded-full bg-blue-500/30 blur-3xl top-10 left-10 glow"></div>
-      <div className="absolute w-72 h-72 rounded-full bg-purple-500/30 blur-3xl bottom-10 right-10 glow"></div>
+                {/* ✅ Left Side - Company Info, Map, Social */}
+                <motion.div
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="space-y-8"
+                >
+                    {/* Address & Contact */}
+                    <div className="bg-white/90 backdrop-blur-xl p-8 rounded-3xl shadow-xl border border-gray-100">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-4">Our Office</h2>
+                        <p className="text-gray-700 mb-2">📍 Skyway IT Solution,Gandhinagar, Gujarat, India</p>
+                        <p className="text-gray-700 mb-2">📞 +91 8000067693</p>
+                        <p className="text-gray-700">📧 support@motormines.com</p>
+                    </div>
 
-      {/* CARD */}
-      <motion.div
-        className="contact-card z-20 w-full max-w-2xl bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-2xl relative"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <h2 className="text-4xl font-bold text-center text-gray-800 mb-2">
-          Contact Us ✉️
-        </h2>
-        <p className="text-gray-600 text-center mb-8">
-          We're here to help you with <span className="text-blue-600 font-semibold">MotorMines</span>
-        </p>
+                    {/* Google Map */}
+                    <div className="overflow-hidden rounded-3xl shadow-xl border border-gray-100">
+                        <iframe
+                            title="MotorMines Location"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3398.7562722365833!2d72.6572576!3d23.2403875!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395c2b0047611aa1%3A0xcb3cb6b0bed7c87a!2sSkyway%20IT%20Solution!5e1!3m2!1sen!2sin!4v1763186739877!5m2!1sen!2sin"
+                            width="100%"
+                            height="280"
+                            className="border-0 w-full"
+                            allowFullScreen=""
+                            loading="lazy"
+                        ></iframe>
+                    </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+                    {/* Social Links */}
+                    {/* <div className="flex space-x-6 justify-center lg:justify-start">
+            <a href="#" className="text-blue-600 hover:text-blue-800 text-2xl">🌐</a>
+            <a href="#" className="text-blue-600 hover:text-blue-800 text-2xl">📘</a>
+            <a href="#" className="text-pink-500 hover:text-pink-700 text-2xl">📸</a>
+            <a href="#" className="text-blue-400 hover:text-blue-600 text-2xl">🐦</a>
+          </div> */}
+                </motion.div>
 
-          {/* Input Group */}
-          <div className="relative group">
-            <input
-              type="text"
-              name="name"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              className="peer w-full px-4 py-3 bg-white border border-gray-400 rounded-xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-300 transition-all"
-            />
-            <label
-              className="absolute left-4 top-3 text-gray-600 bg-white px-1 transition-all 
-              peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-500 
-              peer-focus:-top-2 peer-focus:text-sm peer-focus:text-blue-600"
+                {/* ✅ Right Side - Original Contact Form */}
+                <motion.div
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <ContactForm />
+                </motion.div>
+            </div>
+
+            {/* FAQs Section */}
+            {/* <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="max-w-4xl mx-auto mt-16 px-6 text-center space-y-8"
             >
-              Your Name
-            </label>
-          </div>
-
-          <div className="relative group">
-            <input
-              type="email"
-              name="email"
-              required
-              value={formData.email}
-              onChange={handleChange}
-              className="peer w-full px-4 py-3 bg-white border border-gray-400 rounded-xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-300 transition-all"
-            />
-            <label
-              className="absolute left-4 top-3 text-gray-600 bg-white px-1 transition-all 
-              peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-500 
-              peer-focus:-top-2 peer-focus:text-sm peer-focus:text-blue-600"
-            >
-              Email Address
-            </label>
-          </div>
-
-          <div className="relative group">
-            <textarea
-              name="message"
-              rows="4"
-              required
-              value={formData.message}
-              onChange={handleChange}
-              className="peer w-full px-4 py-3 bg-white border border-gray-400 rounded-xl outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-300 transition-all"
-            ></textarea>
-
-            <label
-              className="absolute left-4 top-3 text-gray-600 bg-white px-1 transition-all 
-              peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-500 
-              peer-focus:-top-2 peer-focus:text-sm peer-focus:text-blue-600"
-            >
-              Message
-            </label>
-          </div>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type="submit"
-            className="w-full py-3 rounded-xl text-white font-semibold text-lg 
-            bg-gradient-to-r from-blue-500 to-purple-600 
-            hover:from-purple-600 hover:to-blue-500 transition-all duration-300 shadow-lg"
-          >
-            Send Message
-          </motion.button>
-        </form>
-      </motion.div>
-    </div>
-  );
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">FAQs</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl shadow-md">
+                        <h3 className="font-semibold text-gray-800 mb-2">How can I get a quote?</h3>
+                        <p className="text-gray-600 text-sm">You can contact us via the form or call our support number.</p>
+                    </div>
+                    <div className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl shadow-md">
+                        <h3 className="font-semibold text-gray-800 mb-2">Do you ship nationwide?</h3>
+                        <p className="text-gray-600 text-sm">Yes! Our submersible pumps are delivered across India.</p>
+                    </div>
+                </div>
+            </motion.div> */}
+        </div>
+        </>
+    );
 };
 
 export default Contact;
+        <Footer/>   

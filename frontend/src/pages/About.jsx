@@ -1,26 +1,45 @@
 // frontend/src/pages/About.jsx
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
+// import LocomotiveScroll from "locomotive-scroll";
+// import "locomotive-scroll/dist/locomotive-scroll.css";
 
 // import axios from "axios";
 import api from "../api/axiosInstance"; // ✅ import yaha
+import Footer from "../components/Footer";
 
 const About = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
-useEffect(() => {
-  api
-    .get("/admin/public/addabout") // bas relative path de
-    .then((res) => setProducts(res.data.features))
-    .catch(() => console.log("Error fetching products"));
-}, []);
+// useEffect(() => {
+//   const scroll = new LocomotiveScroll({
+//     el: document.querySelector("[data-scroll-section]"),
+//     smooth: true,
+//     multiplier: 1,
+//   });
+
+//   return () => scroll.destroy();
+// }, []);
+  
+  useEffect(() => {
+    api
+      .get("/admin/public/addabout") // bas relative path de
+      .then((res) => setProducts(res.data.features))
+      .catch(() => console.log("Error fetching products"));
+  }, []);
 
   return (
     <>
       {/* SECTION 1 - Static Icons (Why Choose MotorMines) */}
-      <div className="bg-white py-16 px-6 sm:px-10 lg:px-20">
+      <div
+        className="bg-white py-16 px-6 sm:px-10 lg:px-20"
+        // data-scroll
+        // data-scroll-section
+        // data-scroll-speed="8"
+      >
+
         <h2 className="text-3xl font-bold text-center mb-14 text-gray-900">
           Why To Choose MotorMines
         </h2>
@@ -125,9 +144,9 @@ useEffect(() => {
                     </p>
                   </div>
                   <button className="text-blue-700 font-semibold hover:underline mt-2"
-                  onClick={() => navigate("/moreproduct")}
-                  >   View moreproduct → 
-                   
+                    onClick={() => navigate("/moreproduct")}
+                  >   View moreproduct →
+
                   </button>
                 </div>
               </div>
@@ -135,6 +154,8 @@ useEffect(() => {
           ))}
         </div>
       </div>
+{/* <Footer /> */}
+
     </>
   );
 };
